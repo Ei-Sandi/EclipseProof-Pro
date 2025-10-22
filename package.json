@@ -20,18 +20,25 @@
     "@midnight-ntwrk/midnight-js-http-client-proof-provider": "2.0.2",
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "2.0.2",
     "@midnight-ntwrk/midnight-js-level-private-state-provider": "2.0.2",
-    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "2.0.2",
     "@midnight-ntwrk/midnight-js-network-id": "2.0.2",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "2.0.2",
     "@midnight-ntwrk/midnight-js-types": "2.0.2",
     "@midnight-ntwrk/wallet": "5.0.0",
     "@midnight-ntwrk/wallet-api": "5.0.0",
     "@midnight-ntwrk/zswap": "^4.0.0",
+    "bcrypt": "^6.0.0",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.3",
+    "pg": "^8.16.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.4.0",
+    "@types/pg": "^8.15.5",
     "@types/ws": "^8.5.10",
-    "typescript": "^5.9.2",
-    "concurrently": "^7.6.0"
+    "concurrently": "^7.6.0",
+    "typescript": "^5.9.2"
   }
 }
