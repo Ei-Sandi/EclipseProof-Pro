@@ -4,10 +4,10 @@ import { Resource } from '@midnight-ntwrk/wallet';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
-import { WalletManager } from './WalletManager';
-import { EncryptionService } from '../utils/EncryptionService';
-import { DatabaseService } from '../db/DatabaseService';
-import { User } from './User';
+import { WalletManager } from './WalletManager.js';
+import { EncryptionService } from '../utils/EncryptionService.js';
+import { DatabaseService } from '../db/DatabaseService.js';
+import { User } from './User.js';
 
 export class UserAccount {
     private walletManager: WalletManager;
@@ -88,7 +88,7 @@ export class UserAccount {
 
         const encryptedSeed = await this.db.getEncryptedSeed(userData);
         const seed = await this.encryptionService.decrypt(encryptedSeed, secretKey);
-        
+
         const encryptedState = await this.db.getEncryptedState(userData);
         const state = await this.encryptionService.decrypt(encryptedState, secretKey);
 

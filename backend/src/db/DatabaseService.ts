@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
-import { EncryptedPayload } from '../utils/EncryptedPayload';
-import { User } from '../services/User';
+import { EncryptedPayload } from '../utils/EncryptedPayload.js';
+import { User } from '../services/User.js';
 
 export class DatabaseService {
     private pool: Pool;

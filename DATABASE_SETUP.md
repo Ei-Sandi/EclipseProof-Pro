@@ -49,10 +49,10 @@ GRANT ALL PRIVILEGES ON DATABASE EclipseProof TO your_username;
 In your project's root folder, create a `.env` file with your credentials:
 
 ```bash
-DB_NAME = 'EclipseProof'
-DB_USER = 'your_db_username'
-DB_PASSWORD = 'your_db_password' 
-DB_HOST = 'localhost'
+DB_NAME = EclipseProof
+DB_USER = your_db_username
+DB_PASSWORD = your_db_password
+DB_HOST = localhost
 ```
 
 #### Add `.env` to `.gitignore`

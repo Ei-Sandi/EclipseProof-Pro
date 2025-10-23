@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 
-import { EncryptedPayload } from './EncryptedPayload';
+import { EncryptedPayload } from './EncryptedPayload.js';
 
 const pbkdf2 = promisify(crypto.pbkdf2);
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
@@ -49,7 +49,7 @@ export class EncryptionService {
         };
     }
 
-    
+
     async decrypt(payload: EncryptedPayload, secretKey: string): Promise<string> {
 
         // 1. Convert the hex-encoded components back into Buffers

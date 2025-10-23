@@ -1,6 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "dist/App.js",
   "scripts": {
     "build": "tsc",
@@ -8,24 +9,25 @@
     "dev": "ts-node src/App.ts"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "pg": "^8.16.3",
-    "bcrypt": "^6.0.0",
-    "dotenv": "^17.2.3",
-    "crypto-js": "^4.2.0",
+    "@midnight-ntwrk/ledger": "^4.0.0",
     "@midnight-ntwrk/wallet": "5.0.0",
     "@midnight-ntwrk/wallet-api": "5.0.0",
-    "@midnight-ntwrk/ledger": "^4.0.0"
+    "@midnight-ntwrk/wallet-sdk-hd": "^2.0.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/crypto-js": "^4.2.2",
     "@types/express": "^4.17.21",
     "@types/node": "^24.4.0",
     "@types/pg": "^8.15.5",
-    "@types/bcrypt": "^6.0.0",
-    "@types/crypto-js": "^4.2.2",
-    "@types/cors": "^2.8.17",
-    "typescript": "^5.9.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }

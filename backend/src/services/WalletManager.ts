@@ -17,7 +17,11 @@ export class WalletManager {
 
     async createWalletAndReturnSeed() {
         try {
-            const seed = generateRandomSeed().toString();
+            const seedBytes = generateRandomSeed();
+            // Convert Uint8Array to hex string
+            const seed = Array.from(seedBytes)
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
 
             this.wallet = await WalletBuilder.build(
                 INDEXER_URL,

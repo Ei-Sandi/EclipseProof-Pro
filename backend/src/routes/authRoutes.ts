@@ -1,5 +1,5 @@
 import express from 'express';
-import { UserAccount } from '../services/UserAccount';
+import { UserAccount } from '../services/UserAccount.js';
 
 export const authRouter = express.Router();
 
@@ -33,13 +33,13 @@ authRouter.post('/login', async (req, res) => {
     try {
         const userAccount = new UserAccount();
         await userAccount.login(email, password);
-        return res.status(201).json({ message: 'User successfully registered and wallet created.' });
+        return res.status(201).json({ message: 'User successfully logged in.' });
     } catch (error) {
         console.error('Signup Error:', error);
         return res.status(400).json({
-            error: error instanceof Error ? error.message : 'An unknown error occurred during signup.'
+            error: error instanceof Error ? error.message : 'An unknown error occurred during logging in.'
         });
     }
-    
+
 });
 
