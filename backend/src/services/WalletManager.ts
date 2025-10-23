@@ -1,4 +1,5 @@
-import { WalletBuilder } from '@midnight-ntwrk/wallet';
+import { WalletBuilder, Resource } from '@midnight-ntwrk/wallet';
+import { Wallet } from '@midnight-ntwrk/wallet-api';
 import { NetworkId } from '@midnight-ntwrk/zswap';
 import { generateRandomSeed } from '@midnight-ntwrk/wallet-sdk-hd';
 
@@ -8,7 +9,11 @@ const PROVE_SERVER_URL = process.env.PROVE_SERVER_URL || 'http://localhost:6300'
 const NODE_URL = process.env.NODE_URL || 'https://rpc.testnet-02.midnight.network';
 
 export class WalletManager {
-    private wallet: any = null;
+    private wallet: (Wallet & Resource) | null = null;
+    
+    constructor() {
+        this.wallet = null;
+    }
 
     async createWalletAndReturnSeed() {
         try {

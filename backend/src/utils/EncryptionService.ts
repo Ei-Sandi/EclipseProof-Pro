@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 
-import { EncryptedPayload } from './EncryptedPayload'; 
+import { EncryptedPayload } from './EncryptedPayload';
 
 const pbkdf2 = promisify(crypto.pbkdf2);
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
