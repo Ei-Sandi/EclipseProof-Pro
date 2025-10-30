@@ -98,22 +98,6 @@ export class DatabaseService {
         return user;
     }
 
-    getHashPassword(userData: any) {
-        return userData.hashedPassword;
-    }
-
-    getEncryptedSecretKey(userData: any) {
-        return userData.encryptedSecretKey;
-    }
-
-    getEncryptedSeed(userData: any) {
-        return userData.encryptedSeed;
-    }
-
-    getEncryptedState(userData: any) {
-        return userData.encryptedState;
-    }
-
     private async queryUserByEmail(email: string) {
         const query = `
         SELECT * FROM UserAccount
