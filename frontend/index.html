@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EclipseProof | Privacy-Preserving Income Verification</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌙</text></svg>">
+</head>
+<body>
+    
+    <!-- ============ NAVBAR ============ -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top glassmorphism">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <span class="logo-icon me-2">🌙</span>
+                <span class="logo-text">EclipseProof</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="badge bg-midnight ms-2">
+                            <i class="bi bi-shield-lock-fill me-1"></i>
+                            Powered by Midnight Network
+                        </span>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <button class="btn btn-gradient-primary" id="walletBtn" onclick="connectWallet()">
+                            <i class="bi bi-wallet2 me-2"></i>
+                            <span id="walletText">Connect Wallet</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============ HERO SECTION ============ -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100 py-5">
+                <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+                    <div class="hero-badge mb-3">
+                        <i class="bi bi-stars me-2"></i>
+                        Zero-Knowledge Proof Technology
+                    </div>
+                    
+                    <h1 class="display-3 fw-bold mb-4">
+                        Prove Your Income
+                        <span class="gradient-text">Without Revealing</span>
+                        Your Salary
+                    </h1>
+                    
+                    <p class="lead text-muted mb-4">
+                        Privacy-preserving income verification powered by AI and Midnight Network's zero-knowledge proofs. 
+                        Prove you meet requirements without exposing sensitive financial data.
+                    </p>
+                    
+                    <div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
+                        <button class="btn btn-gradient-primary btn-lg" onclick="document.getElementById('upload-section').scrollIntoView({behavior: 'smooth'})">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Generate Proof
+                        </button>
+                        <button class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Watch Demo
+                        </button>
+                    </div>
+                    
+                    <!-- Trust Indicators -->
+                    <div class="trust-indicators mt-5">
+                        <div class="row g-4">
+                            <div class="col-4">
+                                <div class="stat-card">
+                                    <i class="bi bi-shield-fill-check text-primary fs-3 mb-2"></i>
+                                    <div class="fw-bold">100% Private</div>
+                                    <small class="text-muted">Zero data leaked</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-card">
+                                    <i class="bi bi-lightning-charge-fill text-warning fs-3 mb-2"></i>
+                                    <div class="fw-bold">< 3 Seconds</div>
+                                    <small class="text-muted">Instant proof</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-card">
+                                    <i class="bi bi-patch-check-fill text-success fs-3 mb-2"></i>
+                                    <div class="fw-bold">Verifiable</div>
+                                    <small class="text-muted">On-chain proof</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="hero-visual">
+                        <!-- 3D-ish card with animation -->
+                        <div class="proof-card-demo">
+                            <div class="card glassmorphism border-gradient">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <div class="badge bg-success mb-2">
+                                                <i class="bi bi-check-circle-fill me-1"></i>
+                                                Verified
+                                            </div>
+                                            <h5 class="mb-0">Income Verification</h5>
+                                        </div>
+                                        <i class="bi bi-shield-lock-fill fs-1 text-primary"></i>
+                                    </div>
+                                    
+                                    <div class="proof-details">
+                                        <div class="proof-item">
+                                            <span class="text-muted">Threshold Met</span>
+                                            <span class="text-success fw-bold">✓ YES</span>
+                                        </div>
+                                        <div class="proof-item">
+                                            <span class="text-muted">Required Amount</span>
+                                            <span>£2,500</span>
+                                        </div>
+                                        <div class="proof-item">
+                                            <span class="text-muted">Actual Income</span>
+                                            <span class="text-primary">🔒 Private</span>
+                                        </div>
+                                        <div class="proof-item">
+                                            <span class="text-muted">Verification Date</span>
+                                            <span>Oct 30, 2025</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="qr-placeholder mt-4 text-center">
+                                        <div class="qr-code-demo">
+                                            <i class="bi bi-qr-code fs-1 text-muted"></i>
+                                        </div>
+                                        <small class="text-muted">Shareable QR Proof</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Animated background -->
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+    </section>
+
+    <!-- ============ UPLOAD SECTION ============ -->
+    <section id="upload-section" class="upload-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    
+                    <!-- Wallet Connection Status -->
+                    <div id="walletStatus" class="alert alert-info glassmorphism d-none mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-wallet2 fs-4 me-3"></i>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">Wallet Connected</div>
+                                <small class="text-muted" id="walletAddress">0x1234...5678</small>
+                            </div>
+                            <span class="badge bg-success">
+                                <i class="bi bi-circle-fill pulse-dot"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Upload Card -->
+                    <div class="card glassmorphism border-gradient">
+                        <div class="card-header border-0 pt-4">
+                            <h3 class="mb-1">
+                                <i class="bi bi-shield-lock-fill text-primary me-2"></i>
+                                Generate Privacy Proof
+                            </h3>
+                            <p class="text-muted mb-0">Upload your payslip to create a zero-knowledge income proof</p>
+                        </div>
+                        
+                        <div class="card-body p-4">
+                            <form id="uploadForm">
+                                
+                                <!-- Step 1: Upload Payslip -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+                                        Step 1: Upload Your Payslip
+                                    </label>
+                                    
+                                    <div class="upload-area" id="uploadArea">
+                                        <input type="file" id="payslipInput" name="payslip" accept=".pdf" class="d-none" required>
+                                        <div class="upload-content">
+                                            <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-3"></i>
+                                            <p class="fw-semibold mb-2">Click to upload or drag and drop</p>
+                                            <small class="text-muted">PDF only • Max 2MB</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- File Preview -->
+                                    <div id="filePreview" class="file-preview d-none mt-3">
+                                        <div class="d-flex align-items-center justify-content-between p-3 rounded bg-dark bg-opacity-50">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4 me-3"></i>
+                                                <div>
+                                                    <div class="fw-semibold" id="fileName"></div>
+                                                    <small class="text-muted" id="fileSize"></small>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile()">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 2: Enter Amount -->
+                                <div class="mb-4">
+                                    <label for="amountInput" class="form-label fw-bold d-flex align-items-center">
+                                        <i class="bi bi-currency-pound text-success me-2"></i>
+                                        Step 2: Minimum Income to Prove (£)
+                                    </label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-dark border-secondary">
+                                            <i class="bi bi-currency-pound"></i>
+                                        </span>
+                                        <input 
+                                            type="number" 
+                                            class="form-control bg-dark border-secondary" 
+                                            id="amountInput" 
+                                            name="amountToProve" 
+                                            placeholder="2500" 
+                                            min="0" 
+                                            required
+                                        >
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Verifiers will only know if you meet this threshold, not your exact income
+                                    </small>
+                                </div>
+                                
+                                <!-- Privacy Notice -->
+                                <div class="alert alert-primary glassmorphism mb-4">
+                                    <div class="d-flex">
+                                        <i class="bi bi-shield-fill-check fs-4 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold mb-1">Your Privacy is Protected</div>
+                                            <small class="text-muted">
+                                                Our AI extracts data locally. Zero-knowledge proofs ensure your exact income 
+                                                never leaves your device. Powered by Midnight Network.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-gradient-primary btn-lg" id="submitBtn">
+                                        <i class="bi bi-stars me-2"></i>
+                                        <span id="submitText">Generate Zero-Knowledge Proof</span>
+                                    </button>
+                                </div>
+                                
+                            </form>
+                            
+                            <!-- Loading State -->
+                            <div id="loadingState" class="text-center py-5 d-none">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="visually-hidden">Processing...</span>
+                                </div>
+                                <h5 class="mb-2">Generating Zero-Knowledge Proof</h5>
+                                <p class="text-muted mb-3">
+                                    <span id="loadingStep">Analyzing payslip with AI...</span>
+                                </p>
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" 
+                                         id="progressBar" 
+                                         style="width: 0%">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SUCCESS RESULT SECTION ============ -->
+    <section id="successSection" class="result-section py-5 d-none">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    
+                    <!-- Success Header -->
+                    <div class="text-center mb-4">
+                        <div class="success-icon mb-3">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        </div>
+                        <h2 class="mb-2">Zero-Knowledge Proof Generated!</h2>
+                        <p class="text-muted">Your privacy-preserving income verification is ready</p>
+                    </div>
+                    
+                    <!-- Verification Result Card -->
+                    <div class="card glassmorphism border-gradient mb-4">
+                        <div class="card-header bg-success bg-opacity-10 border-0">
+                            <h5 class="mb-0">
+                                <i class="bi bi-patch-check-fill text-success me-2"></i>
+                                Verification Result
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span class="text-muted">Income Threshold</span>
+                                        <span class="fw-bold text-success" id="resultThreshold">Met ✓</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <i class="bi bi-calendar-check-fill text-success me-2"></i>
+                                        <span class="text-muted">Age Requirement</span>
+                                        <span class="fw-bold text-success" id="resultAge">30+ days ✓</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <i class="bi bi-currency-pound text-primary me-2"></i>
+                                        <span class="text-muted">Required Amount</span>
+                                        <span class="fw-bold" id="resultRequired">£2,500</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <i class="bi bi-lock-fill text-primary me-2"></i>
+                                        <span class="text-muted">Actual Income</span>
+                                        <span class="fw-bold text-primary">🔒 Private</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- QR Code Card -->
+                    <div class="card glassmorphism border-gradient mb-4">
+                        <div class="card-body text-center p-5">
+                            <h5 class="mb-4">Your Shareable Proof QR Code</h5>
+                            <div class="qr-container mb-4">
+                                <img id="qrImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+                            </div>
+                            
+                            <!-- Proof Key -->
+                            <div class="proof-key-section">
+                                <label class="form-label fw-bold">Proof Key:</label>
+                                <div class="input-group mb-3">
+                                    <input 
+                                        type="text" 
+                                        class="form-control bg-dark border-secondary font-monospace" 
+                                        id="proofKeyDisplay" 
+                                        readonly
+                                    >
+                                    <button class="btn btn-outline-light" onclick="copyProofKey()">
+                                        <i class="bi bi-clipboard"></i>
+                                        <span id="copyBtnText">Copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                <button class="btn btn-success" onclick="downloadQR()">
+                                    <i class="bi bi-download me-2"></i>
+                                    Download QR Code
+                                </button>
+                                <button class="btn btn-outline-light" onclick="resetForm()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>
+                                    Generate New Proof
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy Notice -->
+                    <div class="alert alert-info glassmorphism">
+                        <div class="d-flex">
+                            <i class="bi bi-shield-lock-fill fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold mb-2">🔒 Your Privacy is Guaranteed</div>
+                                <small class="text-muted">
+                                    Your exact income (£<span id="hiddenIncome">XXXX</span>) remains completely private. 
+                                    Verifiers only see that you meet the threshold. This proof is secured by Midnight Network's 
+                                    zero-knowledge technology and cannot be reversed to reveal your sensitive data.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ERROR SECTION ============ -->
+    <section id="errorSection" class="result-section py-5 d-none">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    
+                    <div class="text-center mb-4">
+                        <div class="error-icon mb-3">
+                            <i class="bi bi-x-circle-fill text-danger"></i>
+                        </div>
+                        <h2 class="mb-2">Verification Failed</h2>
+                        <p class="text-muted">Your payslip doesn't meet the requirements</p>
+                    </div>
+                    
+                    <div class="card glassmorphism border-danger mb-4">
+                        <div class="card-body">
+                            <div class="alert alert-danger" id="errorMessage"></div>
+                            <button class="btn btn-outline-light" onclick="resetForm()">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Back to Upload
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer py-5 border-top border-secondary">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="mb-3">
+                        <span class="logo-icon me-2">🌙</span>
+                        EclipseProof
+                    </h5>
+                    <p class="text-muted">
+                        Privacy-preserving income verification powered by AI and Midnight Network's zero-knowledge proofs.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-muted"><i class="bi bi-github fs-4"></i></a>
+                        <a href="#" class="text-muted"><i class="bi bi-twitter fs-4"></i></a>
+                        <a href="#" class="text-muted"><i class="bi bi-discord fs-4"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h6 class="mb-3">Technology</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Midnight Network
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Zero-Knowledge Proofs
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            AI-Powered Extraction
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Lace Wallet Integration
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="mb-3">Powered By</h6>
+                    <div class="badge bg-midnight mb-2">
+                        <i class="bi bi-moon-stars-fill me-2"></i>
+                        Midnight Network
+                    </div>
+                    <p class="text-muted small mt-3">
+                        Built for privacy-conscious users who need verifiable income proof without compromising data security.
+                    </p>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="text-center text-muted small">
+                © 2025 EclipseProof. Secured by Midnight Network. All proofs are mathematically private.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+    
+</body>
+</html>
