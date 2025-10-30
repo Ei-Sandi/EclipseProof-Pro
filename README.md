@@ -1,7 +1,8 @@
 # EclipseProof-Pro
 
 A privacy-preserving income verification dapp using Zero-Knowledge Proofs built on midnight network.
-**POC Repository**: [EclipseProof-POC](https://github.com/Ei-Sandi/EclipseProof-POC)
+
+**Previous Hackathon Proof of Concept Repository**: [EclipseProof-POC](https://github.com/Ei-Sandi/EclipseProof-POC)
 
 ## Prerequisites
 - Node.js 18+
@@ -41,8 +42,8 @@ nano .env
 ## Installation
 ```bash
 npm run install:all
-```
 
+```
 ## Backend
 
 ### Build and Run
@@ -51,18 +52,13 @@ cd backend
 npm run build  # Compile TypeScript
 npm start      # Run server
 ```
+## Frontend
 
-### Test Endpoints
+### Build and Run
 ```bash
-# Signup
-curl -X POST http://localhost:3000/api/auth/signup \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-
-# Login
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
+cd frontend
+npm run build  # Build for production
+npm run dev    # Start development server
 ```
 
 ## Development
