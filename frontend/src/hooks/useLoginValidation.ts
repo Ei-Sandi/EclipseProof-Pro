@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormData {
     email: string;
@@ -12,6 +14,8 @@ interface LoginFormErrors {
 }
 
 export function useLoginValidation() {
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: ''
@@ -93,8 +97,13 @@ export function useLoginValidation() {
                 return false;
             }
 
-            // Success!
+            // Success! Save user data and redirect to dashboard
             console.log('Login successful:', data);
+            login({
+                email: formData.email,
+                id: data.user?.id || data.userId || 'user-id'
+            });
+            navigate('/dashboard');
             return true;
         } catch (error) {
             console.error('Login error:', error);

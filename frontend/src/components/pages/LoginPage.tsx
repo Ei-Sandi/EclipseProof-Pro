@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useLoginValidation } from '../../hooks/useLoginValidation.ts';
+import { useLoginValidation } from '../../hooks/useLoginValidation';
 
 export default function LoginPage() {
     const navigate = useNavigate();
