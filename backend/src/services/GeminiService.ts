@@ -6,7 +6,6 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// FIX #5 & #6: Add type annotations to parameters
 function fileToGenerativePart(path: string, mimeType: string): { inlineData: { data: string; mimeType: string } } {
   return {
     inlineData: {
@@ -16,7 +15,6 @@ function fileToGenerativePart(path: string, mimeType: string): { inlineData: { d
   };
 }
 
-// FIX #7: Add type annotation to filePath parameter
 export async function extractPayslipData(filePath: string): Promise<any> {
   try {
     console.log('📄 Reading file:', filePath);
@@ -65,7 +63,6 @@ Rules:
     return extractedData;
     
   } catch (error) {
-    // FIX #8: Proper error type handling
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error('Extraction error:', errMsg);
     throw error;
