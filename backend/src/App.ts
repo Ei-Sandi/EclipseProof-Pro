@@ -4,6 +4,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import multer from 'multer';
+import fs from 'fs';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +21,33 @@ import { UserAccountManager } from './services/UserAccountManager.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbService = new DatabaseService();
+
+//multer configuration
+const storage = multer.diskStorage({
+  destination: './uploads',
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req: any, file: any, cb: any) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      // FIX #1: Changed to error-first callback pattern
+      cb(new Error('Only PDF files allowed'));
+    }
+  }
+});
+
+// Create uploads folder if it doesn't exist
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+}
+
 
 async function startServer() {
     try {
@@ -46,6 +76,25 @@ async function startServer() {
                 maxAge: 1000 * 60 * 30 // 30 mins
             }
         }));
+        
+           // Fixed import and type checking
+    const proofModule = await import('./routes/proofRoutes.js');
+    const proofRoutesExport = (proofModule as any).default ?? (proofModule as any).proofRoutes;
+    if (proofRoutesExport) {
+      app.use('/api/proof', proofRoutesExport(upload));
+    } else {
+      console.warn('Warning: proofRoutes not found in module ./routes/proofRoutes.js');
+    }
+
+    
+    app.get('/health', (req, res) => {
+      res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString() 
+      });
+    });
+
+    
 
         // Route Handlers
         app.use('/api/auth', authRouter); // Connects your login/signup endpoints
