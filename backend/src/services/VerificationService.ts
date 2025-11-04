@@ -17,17 +17,23 @@ export interface IdVerificationResult {
     };
 }
 
-export async function verifyIdDocument(filePath: string): Promise<IdVerificationResult> {
+export async function verifyIdDocument(
+    filePath: string,
+    documentType: 'passport' | 'drivers_license' | 'national_id'
+): Promise<IdVerificationResult> {
     // TODO: Implement actual ID verification logic
     // For now, returning dummy verification data
 
-    console.log('🆔 Processing ID document:', filePath);
+    console.log('🆔 Processing ID document:', {
+        filePath,
+        documentType
+    });
 
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
 
     const verificationResult: IdVerificationResult = {
         verified: true,
-        documentType: 'passport', 
+        documentType: documentType,
         extractedData: {
             name: 'John Doe',
             dob: '1990-05-15',

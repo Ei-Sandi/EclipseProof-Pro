@@ -4,10 +4,11 @@ import fs from 'fs';
 import { extractPayslipData } from '../services/PayslipParser.js';
 import { verifyIdDocument } from '../services/VerificationService.js';
 import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
+import { requireAuth } from './authRoutes.js';
 
 export const proofRouter: Router = express.Router();
 
-proofRouter.post('/verify', uploadIdDocument.single('idDocument'), async (req: Request, res: Response) => {
+proofRouter.post('/verify', requireAuth, uploadIdDocument.single('idDocument'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -16,15 +17,28 @@ proofRouter.post('/verify', uploadIdDocument.single('idDocument'), async (req: R
       });
     }
 
-    console.log('\n🆔 New ID verification:', req.file.originalname);
+    const documentType = req.body.documentType;
 
-    const verificationResult = await verifyIdDocument(req.file.path);
+    if (!documentType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Document type is required'
+      });
+    }
+
+    console.log('\n🆔 New ID verification:', {
+      filename: req.file.originalname,
+      documentType: documentType
+    });
+
+    const verificationResult = await verifyIdDocument(req.file.path, documentType);
 
     fs.unlinkSync(req.file.path);
 
     res.json({
       success: true,
       ...verificationResult,
+      documentType: documentType,
       timestamp: new Date().toISOString()
     });
 
@@ -43,19 +57,28 @@ proofRouter.post('/verify', uploadIdDocument.single('idDocument'), async (req: R
   }
 });
 
-proofRouter.post('/generate', uploadPayslip.single('payslip'), async (req: Request, res: Response) => {
+proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), async (req: Request, res: Response) => {
   try {
-
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'No file uploaded'
+        message: 'No payslip file uploaded'
       });
     }
 
-    console.log('\n🆕 New upload:', req.file.originalname);
-
     const amountToProve = parseFloat(req.body.amountToProve);
+
+    if (!amountToProve || isNaN(amountToProve) || amountToProve <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid amount to prove is required'
+      });
+    }
+
+    console.log('\n📄 New payslip proof generation:', {
+      filename: req.file.originalname,
+      amountToProve: amountToProve
+    });
 
     const extractedData = await extractPayslipData(req.file.path);
 
@@ -66,8 +89,8 @@ proofRouter.post('/generate', uploadPayslip.single('payslip'), async (req: Reque
     );
 
     const meetsIncomeRequirement = extractedData.grossPay >= amountToProve;
-    const meets30DayRequirement = daysDifference >= 30;
-    const verified = meetsIncomeRequirement && meets30DayRequirement;
+    const isWithin60Days = daysDifference <= 60 && daysDifference >= 0;
+    const verified = meetsIncomeRequirement && isWithin60Days;
 
     res.json({
       success: true,
@@ -78,9 +101,11 @@ proofRouter.post('/generate', uploadPayslip.single('payslip'), async (req: Reque
         requiredAmount: amountToProve,
         meetsIncomeRequirement: meetsIncomeRequirement,
         daysSincePayslip: daysDifference,
-        meets30DayRequirement: meets30DayRequirement,
-        reason: !meets30DayRequirement
-          ? `Payslip is only ${daysDifference} days old (need 30+)`
+        isWithin60Days: isWithin60Days,
+        reason: !isWithin60Days
+          ? daysDifference < 0
+            ? `Payslip date is in the future`
+            : `Payslip is ${daysDifference} days old (must be within last 60 days)`
           : !meetsIncomeRequirement
             ? `Gross pay £${extractedData.grossPay} is below £${amountToProve}`
             : "✅ All requirements met"
@@ -92,7 +117,7 @@ proofRouter.post('/generate', uploadPayslip.single('payslip'), async (req: Reque
 
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    console.error('❌ Error:', errMsg);
+    console.error('❌ Payslip proof generation error:', errMsg);
 
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
