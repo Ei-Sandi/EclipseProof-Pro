@@ -3,10 +3,47 @@ import fs from 'fs';
 import multer from 'multer';
 
 import { extractPayslipData } from '../services/PayslipParser.js';
+import { verifyIdDocument } from '../services/VerificationService.js';
 
 export const proofRouter: Router = express.Router();
 
 const upload = multer({ dest: 'uploads/' });
+
+proofRouter.post('/verify', upload.single('idDocument'), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No ID document uploaded'
+      });
+    }
+
+    console.log('\n🆔 New ID verification:', req.file.originalname);
+
+    const verificationResult = await verifyIdDocument(req.file.path);
+
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      success: true,
+      ...verificationResult,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ ID verification error:', errMsg);
+
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errMsg
+    });
+  }
+});
 
 proofRouter.post('/generate', upload.single('payslip'), async (req: Request, res: Response) => {
   try {
@@ -54,7 +91,7 @@ proofRouter.post('/generate', upload.single('payslip'), async (req: Request, res
     });
 
     fs.unlinkSync(req.file.path);
-    
+
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ Error:', errMsg);
