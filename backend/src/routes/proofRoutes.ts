@@ -1,15 +1,13 @@
 import express, { Router, Request, Response } from 'express';
 import fs from 'fs';
-import multer from 'multer';
 
 import { extractPayslipData } from '../services/PayslipParser.js';
 import { verifyIdDocument } from '../services/VerificationService.js';
+import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
 
 export const proofRouter: Router = express.Router();
 
-const upload = multer({ dest: 'uploads/' });
-
-proofRouter.post('/verify', upload.single('idDocument'), async (req: Request, res: Response) => {
+proofRouter.post('/verify', uploadIdDocument.single('idDocument'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -45,7 +43,7 @@ proofRouter.post('/verify', upload.single('idDocument'), async (req: Request, re
   }
 });
 
-proofRouter.post('/generate', upload.single('payslip'), async (req: Request, res: Response) => {
+proofRouter.post('/generate', uploadPayslip.single('payslip'), async (req: Request, res: Response) => {
   try {
 
     if (!req.file) {

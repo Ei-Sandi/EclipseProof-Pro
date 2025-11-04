@@ -4,7 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import multer from 'multer';
 import fs from 'fs';
 
 import { authRouter } from './routes/authRoutes.js';
@@ -20,25 +19,6 @@ dotenv.config({ path: join(__dirname, '../../.env') });
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbService = new DatabaseService();
-
-//multer configuration
-const storage = multer.diskStorage({
-  destination: './uploads',
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-})
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: (req: any, file: any, cb: any) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files allowed'));
-    }
-  }
-});
 
 async function startServer() {
   try {
