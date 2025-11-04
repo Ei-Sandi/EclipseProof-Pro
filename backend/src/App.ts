@@ -14,6 +14,9 @@ import { UserAccountManager } from './services/UserAccountManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+dotenv.config({ path: join(__dirname, '../../.env') });
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const dbService = new DatabaseService();
@@ -36,8 +39,6 @@ const upload = multer({
     }
   }
 });
-
-dotenv.config({ path: join(__dirname, '../../.env') });
 
 async function startServer() {
   try {
@@ -72,17 +73,9 @@ async function startServer() {
       fs.mkdirSync('./uploads');
     }
 
-    const proofModule = await import('./routes/proofRoutes.js');
-    const proofRoutesExport = (proofModule as any).default ?? (proofModule as any).proofRoutes;
-    if (proofRoutesExport) {
-      app.use('/api/proof', proofRoutesExport(upload));
-    } else {
-      console.warn('Warning: proofRoutes not found in module ./routes/proofRoutes.js');
-    }
-
     // Route Handlers
     app.use('/api/auth', authRouter);
-    app.use('/api/prover', proofRouter);
+    app.use('/api/proof', proofRouter);
 
     // Server Start (Only runs if DB connection succeeded)
     const server = app.listen(PORT, () => {
