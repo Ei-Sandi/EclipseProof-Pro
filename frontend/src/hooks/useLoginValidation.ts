@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { API_ENDPOINTS } from '../config/api';
 
 interface LoginFormData {
     email: string;
@@ -78,7 +78,7 @@ export function useLoginValidation() {
         // Call backend API
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/login', {
+            const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

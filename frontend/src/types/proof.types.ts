@@ -1,10 +1,19 @@
+export interface IdFormData {
+    documentType: 'passport' | 'drivers_license' | 'national_id' | '';
+    idFile: File | null;
+}
+
+export interface PayslipFormData {
+    payslipFile: File | null;
+    proofAmount: string;
+}
+
+// Combined Form Data (for managing all form state)
 export interface FormData {
-    idType: string;
-    idNumber: string;
+    documentType: 'passport' | 'drivers_license' | 'national_id' | '';
     idFile: File | null;
     payslipFile: File | null;
     proofAmount: string;
-    actualIncome: string;
 }
 
 export interface Proof {

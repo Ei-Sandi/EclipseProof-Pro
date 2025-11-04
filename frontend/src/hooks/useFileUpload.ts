@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface FileUploadOptions {
     maxSizeMB?: number;
-    acceptedTypes?: string[];
+    acceptedTypes: string[];
 }
 
 interface FileValidationError {
@@ -10,14 +10,13 @@ interface FileValidationError {
     message: string;
 }
 
-export function useFileUpload(options: FileUploadOptions = {}) {
-    const { maxSizeMB = 10, acceptedTypes = ['image/*', '.pdf'] } = options;
+export function useFileUpload(options: FileUploadOptions) {
+    const { maxSizeMB = 10, acceptedTypes } = options;
     const [error, setError] = useState<FileValidationError | null>(null);
 
     const validateFile = (file: File): boolean => {
         setError(null);
 
-        // Check file size
         const maxSizeBytes = maxSizeMB * 1024 * 1024;
         if (file.size > maxSizeBytes) {
             setError({
@@ -27,7 +26,6 @@ export function useFileUpload(options: FileUploadOptions = {}) {
             return false;
         }
 
-        // Check file type
         const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
         const fileType = file.type;
 
@@ -59,4 +57,20 @@ export function useFileUpload(options: FileUploadOptions = {}) {
         error,
         clearError
     };
+}
+
+// Specialized hook for image uploads only
+export function useImageUpload(maxSizeMB = 10) {
+    return useFileUpload({
+        maxSizeMB,
+        acceptedTypes: ['image/*']
+    });
+}
+
+// Specialized hook for PDF uploads only
+export function usePdfUpload(maxSizeMB = 10) {
+    return useFileUpload({
+        maxSizeMB,
+        acceptedTypes: ['.pdf', 'application/pdf']
+    });
 }

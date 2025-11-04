@@ -1,11 +1,11 @@
 import type { ChangeEvent } from 'react';
 import { FileText, AlertCircle } from 'lucide-react';
-import type { FormData } from '../../../types/proof.types';
+import type { PayslipFormData } from '../../../types/proof.types';
 
 interface PayslipUploadStepProps {
-    formData: FormData;
+    formData: PayslipFormData;
     onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    onFileUpload: (e: ChangeEvent<HTMLInputElement>, fileType: 'idFile' | 'payslipFile') => void;
+    onFileUpload: (e: ChangeEvent<HTMLInputElement>, fileType: 'payslipFile') => void;
     onPrevious: () => void;
     onNext: () => void;
 }
@@ -66,20 +66,22 @@ export default function PayslipUploadStep({
 
                 <div>
                     <label className="block text-sm font-medium text-slate-900 mb-2">
-                        Your Monthly Income (for verification)
+                        Minimum Income You Want to Prove
                     </label>
                     <div className="relative">
                         <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-700 font-medium">£</span>
                         <input
                             type="number"
-                            name="actualIncome"
-                            value={formData.actualIncome}
+                            name="proofAmount"
+                            value={formData.proofAmount}
                             onChange={onInputChange}
                             placeholder="0"
                             className="w-full pl-8 pr-4 py-3 bg-cyan-50 border border-cyan-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
                         />
                     </div>
-                    <p className="text-sm text-slate-500 mt-2">This information is used to verify your payslip and will not be shared</p>
+                    <p className="text-sm text-slate-500 mt-2">
+                        Enter the minimum monthly income threshold you want to prove
+                    </p>
                 </div>
 
                 <div className="flex gap-4">

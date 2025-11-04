@@ -1,181 +1,182 @@
-import type { ChangeEvent, FormEvent } from 'react';
-import { Shield, CheckCircle, AlertCircle } from 'lucide-react';
-import type { FormData } from '../../../types/proof.types';
+import type { FormEvent } from 'react';
+import { Shield, CheckCircle, AlertCircle, Lock, FileCheck, Globe } from 'lucide-react';
+import { useState } from 'react';
 
 interface ProofGenerationStepProps {
-    formData: FormData;
-    onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     onSubmit: (e: FormEvent) => void;
     onPrevious: () => void;
-    onEditStep: (step: number) => void;
 }
 
 export default function ProofGenerationStep({
-    formData,
-    onInputChange,
     onSubmit,
-    onPrevious,
-    onEditStep
+    onPrevious
 }: ProofGenerationStepProps) {
-    const isFormValid = formData.idType &&
-                       formData.idNumber &&
-                       formData.idFile &&
-                       formData.payslipFile &&
-                       formData.actualIncome;
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        if (agreedToTerms) {
+            onSubmit(e);
+        }
+    };
 
     return (
         <div className="space-y-6">
-            {/* Review Section */}
-            <div className="bg-cyan-50 border border-cyan-200 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-cyan-600" />
-                    Review Your Information
-                </h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                    {/* ID Information */}
-                    <div className="bg-white rounded-lg p-4 border border-cyan-200">
-                        <p className="text-sm font-medium text-slate-600 mb-3">Identity Verification</p>
-                        <div className="space-y-2">
-                            <div>
-                                <span className="text-xs text-slate-500">ID Type:</span>
-                                <p className="font-medium text-slate-900 capitalize">
-                                    {formData.idType.replace('_', ' ')}
-                                </p>
-                            </div>
-                            <div>
-                                <span className="text-xs text-slate-500">ID Number:</span>
-                                <p className="font-medium text-slate-900">{formData.idNumber}</p>
-                            </div>
-                            <div>
-                                <span className="text-xs text-slate-500">Document:</span>
-                                <p className="font-medium text-slate-900 text-sm">{formData.idFile?.name}</p>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => onEditStep(1)}
-                            className="mt-3 text-sm text-cyan-600 hover:text-cyan-700 font-medium"
-                        >
-                            Edit →
-                        </button>
-                    </div>
-
-                    {/* Payslip Information */}
-                    <div className="bg-white rounded-lg p-4 border border-cyan-200">
-                        <p className="text-sm font-medium text-slate-600 mb-3">Income Verification</p>
-                        <div className="space-y-2">
-                            <div>
-                                <span className="text-xs text-slate-500">Monthly Income:</span>
-                                <p className="font-medium text-slate-900 text-lg">£{formData.actualIncome}</p>
-                            </div>
-                            <div>
-                                <span className="text-xs text-slate-500">Payslip Document:</span>
-                                <p className="font-medium text-slate-900 text-sm">{formData.payslipFile?.name}</p>
-                            </div>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => onEditStep(2)}
-                            className="mt-3 text-sm text-cyan-600 hover:text-cyan-700 font-medium"
-                        >
-                            Edit →
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Generate Proof Form */}
+            {/* Zero-Knowledge Proof Explanation */}
             <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
                         <Shield className="w-6 h-6 text-cyan-600" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900">Generate Income Proof</h2>
-                        <p className="text-slate-600">Specify the minimum income you need to prove</p>
+                        <h2 className="text-2xl font-bold text-slate-900">Generate Your Proof</h2>
+                        <p className="text-slate-600">Understanding Zero-Knowledge Proofs & Privacy</p>
                     </div>
                 </div>
 
-                <form onSubmit={onSubmit} className="space-y-6">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-slate-700">
-                            <p className="font-medium mb-1">Identity and income verified</p>
-                            <p>Your monthly income of £{formData.actualIncome} has been securely verified</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-slate-900 mb-2">
-                            Minimum Income to Prove
-                        </label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-700 font-medium">£</span>
-                            <input
-                                type="number"
-                                name="proofAmount"
-                                value={formData.proofAmount}
-                                onChange={onInputChange}
-                                placeholder="0"
-                                max={formData.actualIncome}
-                                className="w-full pl-8 pr-4 py-3 bg-cyan-50 border border-cyan-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                                required
-                            />
-                        </div>
-                        <p className="text-sm text-slate-500 mt-2">
-                            Enter the minimum monthly income you need to prove (max: £{formData.actualIncome})
+                <div className="space-y-6">
+                    {/* What is ZKP */}
+                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg p-6">
+                        <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-cyan-600" />
+                            What is a Zero-Knowledge Proof?
+                        </h3>
+                        <p className="text-slate-700 mb-3">
+                            A Zero-Knowledge Proof (ZKP) is a cryptographic method that allows you to prove a statement is true
+                            without revealing any information beyond the validity of the statement itself.
+                        </p>
+                        <p className="text-slate-700">
+                            In your case, we'll prove you earn above a certain threshold <strong>without revealing your exact income</strong>
+                            or any other sensitive personal information.
                         </p>
                     </div>
 
-                    <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-                        <h3 className="font-medium text-slate-900 mb-2">How it works:</h3>
-                        <ul className="space-y-2 text-sm text-slate-700">
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                                <span>Your proof will confirm you earn at least the specified amount</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                                <span>Your exact income remains private and encrypted</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                                <span>The proof is cryptographically verifiable on the blockchain</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                                <CheckCircle className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
-                                <span>Valid for 30 days from generation</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {!isFormValid && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div className="text-sm text-slate-700">
-                                <p className="font-medium mb-1">Please complete all steps</p>
-                                <p>Make sure you've filled in all required information in Step 1 and Step 2 before generating your proof.</p>
+                    {/* How Your Data is Protected */}
+                    <div>
+                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <FileCheck className="w-5 h-5 text-cyan-600" />
+                            How Your Data is Protected
+                        </h3>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
+                                <h4 className="font-semibold text-slate-900 mb-1">Encrypted Processing</h4>
+                                <p className="text-sm text-slate-700">
+                                    Your documents are encrypted and processed securely. No plaintext data is ever stored.
+                                </p>
+                            </div>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
+                                <h4 className="font-semibold text-slate-900 mb-1">Privacy-Preserving</h4>
+                                <p className="text-sm text-slate-700">
+                                    Only the cryptographic proof is generated. Your exact income remains completely private.
+                                </p>
+                            </div>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
+                                <h4 className="font-semibold text-slate-900 mb-1">Blockchain Verification</h4>
+                                <p className="text-sm text-slate-700">
+                                    The proof is posted on the Midnight blockchain for transparent, tamper-proof verification.
+                                </p>
+                            </div>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
+                                <h4 className="font-semibold text-slate-900 mb-1">No Data Storage</h4>
+                                <p className="text-sm text-slate-700">
+                                    Your ID and payslip documents are never stored on our servers or anywhere else.
+                                </p>
                             </div>
                         </div>
-                    )}
-
-                    <div className="flex gap-4">
-                        <button
-                            type="button"
-                            onClick={onPrevious}
-                            className="px-6 py-3 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-all"
-                        >
-                            ← Previous
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={!isFormValid || !formData.proofAmount}
-                            className="flex-1 py-3 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-all shadow-lg disabled:bg-slate-400 disabled:cursor-not-allowed"
-                        >
-                            Generate Proof
-                        </button>
                     </div>
-                </form>
+
+                    {/* What Gets Posted On-Chain */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <Globe className="w-5 h-5 text-blue-600" />
+                            What Gets Posted On-Chain?
+                        </h3>
+                        <div className="space-y-2 text-sm text-slate-700">
+                            <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <span><strong>Cryptographic proof</strong> that you meet the income threshold</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <span><strong>Proof ID</strong> for verification purposes</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <span><strong>Timestamp</strong> and expiration date</span>
+                            </div>
+                            <div className="flex items-start gap-2 mt-3 pt-3 border-t border-blue-300">
+                                <AlertCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <span className="font-medium">Your identity, exact income, and personal documents are NEVER posted on-chain or stored anywhere.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Consent Agreement */}
+                    <form onSubmit={handleSubmit}>
+                        <div className="bg-slate-50 border-2 border-slate-300 rounded-lg p-6">
+                            <h3 className="font-bold text-slate-900 mb-4">Privacy Consent & Agreement</h3>
+                            <div className="space-y-3 mb-4 text-sm text-slate-700">
+                                <p>By proceeding, you acknowledge and agree that:</p>
+                                <ul className="space-y-2 ml-4">
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-cyan-600 font-bold">•</span>
+                                        <span>Your identity documents and payslip will be processed to generate a zero-knowledge proof</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-cyan-600 font-bold">•</span>
+                                        <span>Only a cryptographic proof will be posted on the Midnight blockchain</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-cyan-600 font-bold">•</span>
+                                        <span>Your personal documents and exact income will NOT be stored or shared</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-cyan-600 font-bold">•</span>
+                                        <span>The proof will be valid for 30 days from generation</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-cyan-600 font-bold">•</span>
+                                        <span>You have reviewed your information and confirm its accuracy</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    className="mt-1 w-5 h-5 text-cyan-600 border-slate-300 rounded focus:ring-cyan-500"
+                                />
+                                <span className="text-sm text-slate-900 font-medium group-hover:text-cyan-700">
+                                    I understand and agree to the privacy terms. I consent to generate a zero-knowledge proof
+                                    of my income that will be posted on the blockchain.
+                                </span>
+                            </label>
+                        </div>
+
+                        <div className="flex gap-4 mt-6">
+                            <button
+                                type="button"
+                                onClick={onPrevious}
+                                className="px-6 py-3 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-all"
+                            >
+                                ← Previous
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={!agreedToTerms}
+                                className="flex-1 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all shadow-lg disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed"
+                            >
+                                {agreedToTerms ? '🔒 Generate Secure Proof' : '⚠️ Please Accept Terms to Continue'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

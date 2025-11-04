@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ChangeEvent, FormEvent } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 interface RegisterFormData {
     email: string;
@@ -100,7 +100,7 @@ export function useRegisterValidation() {
         // Call backend API
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/signup', {
+            const response = await fetch(API_ENDPOINTS.AUTH.SIGNUP, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,8 +120,8 @@ export function useRegisterValidation() {
             }
 
             console.log('Registration successful:', data);
-            navigate('/login', { 
-                state: { message: 'Registration successful! Please log in.' } 
+            navigate('/login', {
+                state: { message: 'Registration successful! Please log in.' }
             });
 
             return true;

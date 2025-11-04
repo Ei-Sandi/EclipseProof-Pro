@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import type { FormData, Proof } from '../types/proof.types';
+import { API_ENDPOINTS } from '../config/api';
 
 export function useProofGeneration() {
     const [formData, setFormData] = useState<FormData>({
-        idType: '',
-        idNumber: '',
+        documentType: '',
         idFile: null,
         payslipFile: null,
-        proofAmount: '',
-        actualIncome: ''
+        proofAmount: ''
     });
 
     const [generatedProof, setGeneratedProof] = useState<Proof | null>(null);
@@ -17,38 +16,102 @@ export function useProofGeneration() {
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target as HTMLInputElement & HTMLSelectElement;
-        setFormData(prev => ({
+        setFormData((prev: FormData) => ({
             ...prev,
             [name]: value
-        } as unknown as FormData));
+        }));
     };
 
     const handleFileUpload = (e: ChangeEvent<HTMLInputElement>, fileType: 'idFile' | 'payslipFile') => {
         const file = e.target.files?.[0] ?? null;
         if (file) {
-            setFormData(prev => ({ ...prev, [fileType]: file } as unknown as FormData));
+            setFormData((prev: FormData) => ({ ...prev, [fileType]: file }));
         }
     };
 
-    const handleGenerateProof = (e: FormEvent, onSuccess?: () => void) => {
+    const handleGenerateProof = async (e: FormEvent, onSuccess?: () => void) => {
         e.preventDefault();
 
-        // Simulate proof generation
-        setTimeout(() => {
+        try {
+            if (!formData.documentType || !formData.idFile) {
+                throw new Error('Please complete ID verification (document type and ID file required)');
+            }
+
+            if (!formData.payslipFile || !formData.proofAmount) {
+                throw new Error('Please upload payslip and enter minimum income amount');
+            }
+
+            console.log('🆔 Verifying ID document...');
+            const idFormData = new FormData();
+            idFormData.append('idDocument', formData.idFile);
+            idFormData.append('documentType', formData.documentType);
+
+            const idVerifyResponse = await fetch(API_ENDPOINTS.PROOF.VERIFY, {
+                method: 'POST',
+                body: idFormData
+            });
+
+            if (!idVerifyResponse.ok) {
+                const errorData = await idVerifyResponse.json();
+                throw new Error(errorData.message || 'ID verification failed');
+            }
+
+            const idVerifyResult = await idVerifyResponse.json();
+            console.log('✅ ID verification result:', idVerifyResult);
+
+            if (!idVerifyResult.success) {
+                throw new Error('ID verification failed: ' + (idVerifyResult.message || 'Unknown error'));
+            }
+
+            console.log('📄 Generating proof from payslip...');
+            const proofFormData = new FormData();
+            proofFormData.append('payslip', formData.payslipFile);
+            proofFormData.append('amountToProve', formData.proofAmount);
+
+            const proofResponse = await fetch(API_ENDPOINTS.PROOF.GENERATE, {
+                method: 'POST',
+                body: proofFormData
+            });
+
+            if (!proofResponse.ok) {
+                const errorData = await proofResponse.json();
+                throw new Error(errorData.message || 'Proof generation failed');
+            }
+
+            const proofResult = await proofResponse.json();
+            console.log('✅ Proof generation result:', proofResult);
+
+            if (!proofResult.success) {
+                throw new Error('Proof generation failed: ' + (proofResult.message || 'Unknown error'));
+            }
+
+            if (!proofResult.verified) {
+                throw new Error(
+                    proofResult.validation?.reason ||
+                    'Verification failed: Income requirements not met'
+                );
+            }
+
             const proof: Proof = {
                 id: 'PROOF-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
                 requiredAmount: formData.proofAmount,
-                verified: true,
-                generatedAt: new Date().toISOString(),
+                verified: proofResult.verified,
+                generatedAt: proofResult.timestamp || new Date().toISOString(),
                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             };
+
             setGeneratedProof(proof);
             setShowProofModal(true);
 
             if (onSuccess) {
                 onSuccess();
             }
-        }, 2000);
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+            console.error('❌ Proof generation error:', errorMessage);
+            alert('Error: ' + errorMessage);
+        }
     };
 
     const downloadProof = () => {

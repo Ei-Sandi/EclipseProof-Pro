@@ -1,11 +1,12 @@
 import type { ChangeEvent } from 'react';
-import { User, Upload } from 'lucide-react';
-import type { FormData } from '../../../types/proof.types';
+import { User, Upload, AlertCircle } from 'lucide-react';
+import { useImageUpload } from '../../../hooks/useFileUpload';
+import type { IdFormData } from '../../../types/proof.types';
 
 interface IdVerificationStepProps {
-    formData: FormData;
+    formData: IdFormData;
     onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-    onFileUpload: (e: ChangeEvent<HTMLInputElement>, fileType: 'idFile' | 'payslipFile') => void;
+    onFileUpload: (e: ChangeEvent<HTMLInputElement>, fileType: 'idFile') => void;
     onNext: () => void;
 }
 
@@ -15,6 +16,20 @@ export default function IdVerificationStep({
     onFileUpload,
     onNext
 }: IdVerificationStepProps) {
+
+    const { validateFile, error: fileError, clearError } = useImageUpload(10);
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (validateFile(file)) {
+                onFileUpload(e, 'idFile');
+                clearError();
+            }
+            // If validation fails, error will be set by validateFile
+        }
+    };
+
     return (
         <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
@@ -33,8 +48,8 @@ export default function IdVerificationStep({
                         ID Type
                     </label>
                     <select
-                        name="idType"
-                        value={formData.idType}
+                        name="documentType"
+                        value={formData.documentType}
                         onChange={onInputChange}
                         className="w-full px-4 py-3 bg-cyan-50 border border-cyan-200 rounded-lg text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
                     >
@@ -47,20 +62,6 @@ export default function IdVerificationStep({
 
                 <div>
                     <label className="block text-sm font-medium text-slate-900 mb-2">
-                        ID Number
-                    </label>
-                    <input
-                        type="text"
-                        name="idNumber"
-                        value={formData.idNumber}
-                        onChange={onInputChange}
-                        placeholder="Enter your ID number"
-                        className="w-full px-4 py-3 bg-cyan-50 border border-cyan-200 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
                         Upload ID Document
                     </label>
                     <div className="border-2 border-dashed border-cyan-300 rounded-lg p-8 text-center hover:border-cyan-500 transition-all bg-cyan-50">
@@ -68,11 +69,11 @@ export default function IdVerificationStep({
                         <p className="text-slate-700 mb-2">
                             {formData.idFile ? formData.idFile.name : 'Click to upload or drag and drop'}
                         </p>
-                        <p className="text-sm text-slate-500">PNG, JPG or PDF (max. 10MB)</p>
+                        <p className="text-sm text-slate-500">PNG or JPG (max. 10MB)</p>
                         <input
                             type="file"
-                            accept="image/*,.pdf"
-                            onChange={(e) => onFileUpload(e, 'idFile')}
+                            accept="image/*"
+                            onChange={handleFileChange}
                             className="hidden"
                             id="id-upload"
                         />
@@ -83,6 +84,14 @@ export default function IdVerificationStep({
                             Choose File
                         </label>
                     </div>
+
+                    {/* Error Message */}
+                    {fileError && (
+                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-red-700">{fileError.message}</p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex gap-4">

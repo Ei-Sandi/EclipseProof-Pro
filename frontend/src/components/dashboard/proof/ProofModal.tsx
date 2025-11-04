@@ -75,8 +75,8 @@ export default function ProofModal({
                             <h4 className="font-semibold text-slate-900 mb-4">Verified Statement</h4>
                             <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-cyan-500">
                                 <p className="text-slate-700 text-lg">
-                                    This proof cryptographically verifies that the holder earns a monthly income of{' '}
-                                    <span className="font-bold text-slate-900">at least £{proofAmount}</span>.
+                                    This proof cryptographically verifies that the holder earns{' '}
+                                    <span className="font-bold text-slate-900">at least £{proofAmount}</span> per month.
                                 </p>
                             </div>
                             <div className="mt-4 space-y-2 text-sm text-slate-600">

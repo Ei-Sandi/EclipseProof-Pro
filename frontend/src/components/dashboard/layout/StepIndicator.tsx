@@ -1,12 +1,5 @@
 import { CheckCircle } from 'lucide-react';
 
-interface Step {
-    number: number;
-    label: string;
-    isCompleted: boolean;
-    isActive: boolean;
-}
-
 interface StepIndicatorProps {
     currentStep: number;
     steps: {

@@ -15,7 +15,6 @@ export default function EclipseProofDashboard(): React.JSX.Element {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    // Custom hooks for state management
     const {
         formData,
         generatedProof,
@@ -32,7 +31,6 @@ export default function EclipseProofDashboard(): React.JSX.Element {
         idVerified,
         payslipUploaded,
         proofGenerated,
-        goToStep,
         previousStep,
         completeIdVerification,
         completePayslipUpload,
@@ -94,11 +92,8 @@ export default function EclipseProofDashboard(): React.JSX.Element {
                     {/* Step 3: Generate Proof */}
                     {activeStep === 3 && (
                         <ProofGenerationStep
-                            formData={formData}
-                            onInputChange={handleInputChange}
                             onSubmit={(e) => handleGenerateProof(e, completeProofGeneration)}
                             onPrevious={previousStep}
-                            onEditStep={goToStep}
                         />
                     )}
 
