@@ -43,3 +43,6 @@ Desktop.ini
 
 # Yarn Integrity file
 .yarn-integrity
+
+# Compiled ZK contracts
+contracts/managed/

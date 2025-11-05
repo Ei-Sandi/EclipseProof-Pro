@@ -1,0 +1,67 @@
+pragma language_version >= 0.16 && <= 0.17;
+
+import CompactStandardLibrary;
+
+// Public ledger declarations
+export ledger payslipVerificationHash: Bytes<32>;
+
+// Witness declarations for private data
+witness getIDName(): Bytes<32>;
+witness getIDDOB(): Bytes<32>;
+
+// Step 1: Verify payslip name matches stored ID name
+export circuit verifyPayslipName(
+  payslipName: Bytes<32>
+): Boolean {
+  // Get private ID name via witness
+  const storedName = getIDName();
+  
+  // Hash both names and compare
+  const storedNameHash = persistentHash<Bytes<32>>(storedName);
+  const payslipNameHash = persistentHash<Bytes<32>>(payslipName);
+  
+  return disclose(storedNameHash == payslipNameHash);
+}
+
+// Step 2: Create verification hash
+export circuit createVerificationHash(
+  netPay: Field,
+  proveAmount: Field,
+  proofGeneratedDate: Field,
+  randomness: Bytes<32>
+): Bytes<32> {
+  // Get private data via witnesses
+  const storedName = getIDName();
+  const storedDOB = getIDDOB();
+  
+  // Create commitment
+  const verificationHash = persistentCommit<Vector<5, Bytes<32>>>(
+    [storedName, storedDOB, netPay as Bytes<32>, proveAmount as Bytes<32>, proofGeneratedDate as Bytes<32>],
+    randomness
+  );
+  
+  // Store hash on-chain
+  payslipVerificationHash = disclose(verificationHash);
+  
+  return disclose(verificationHash);
+}
+
+// Step 3: Verifier checks against the stored hash
+export circuit verifyAgainstHash(
+  verifierName: Bytes<32>,
+  verifierDOB: Bytes<32>,
+  verifierNetPay: Field,
+  verifierProveAmount: Field,
+  proofGeneratedDate: Field,
+  verificationHash: Bytes<32>,
+  randomness: Bytes<32>
+): Boolean {
+  // Recompute the commitment using verifier's inputs
+  const recomputedHash = persistentCommit<Vector<5, Bytes<32>>>(
+    [verifierName, verifierDOB, verifierNetPay as Bytes<32>, verifierProveAmount as Bytes<32>, proofGeneratedDate as Bytes<32>],
+    randomness
+  );
+  
+  // Compare to the on-chain hash
+  return recomputedHash == payslipVerificationHash && recomputedHash == verificationHash;
+}

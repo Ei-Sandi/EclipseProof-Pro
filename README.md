@@ -44,6 +44,12 @@ nano .env
 npm run install:all
 
 ```
+
+**Note:** Compile the contract first before running backend/frontend:
+```bash
+npm run compile
+```
+
 ## Backend
 
 ### Build and Run
