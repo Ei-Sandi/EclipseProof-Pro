@@ -48,12 +48,13 @@ export function useProofGeneration() {
 
             const idVerifyResponse = await fetch(API_ENDPOINTS.PROOF.VERIFY, {
                 method: 'POST',
-                body: idFormData
+                body: idFormData,
+                credentials: 'include'
             });
 
             if (!idVerifyResponse.ok) {
                 const errorData = await idVerifyResponse.json();
-                throw new Error(errorData.message || 'ID verification failed');
+                throw new Error(errorData.message || errorData.error || 'ID verification failed');
             }
 
             const idVerifyResult = await idVerifyResponse.json();
@@ -70,7 +71,8 @@ export function useProofGeneration() {
 
             const proofResponse = await fetch(API_ENDPOINTS.PROOF.GENERATE, {
                 method: 'POST',
-                body: proofFormData
+                body: proofFormData,
+                credentials: 'include'
             });
 
             if (!proofResponse.ok) {

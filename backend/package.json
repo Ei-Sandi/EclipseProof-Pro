@@ -1,8 +1,8 @@
 {
   "name": "backend",
   "version": "1.0.0",
-    "type": "module",
-  "main": "dist/App.js",
+  "type": "module",
+  "main": "dist/App.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/App.js",
