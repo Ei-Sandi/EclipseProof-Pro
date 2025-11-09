@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import fs from 'fs';
 
-import { extractPayslipData } from '../services/PayslipParser.js';
+import { vertexExtractor } from '../services/PayslipParser.js';
 import { verifyIdDocument } from '../services/VerificationService.js';
 import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
 import { requireAuth } from './authRoutes.js';
@@ -80,15 +80,62 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       amountToProve: amountToProve
     });
 
-    const extractedData = await extractPayslipData(req.file.path);
+    // ✅ Read file as Buffer (Vertex AI needs buffer, not file path)
+    const pdfBuffer = fs.readFileSync(req.file.path);
 
-    const payslipDate = new Date(extractedData.payslipDate);
+    // ✅ Use Vertex AI instead of old extractPayslipData()
+    const extractionResult = await vertexExtractor.extractFromPDF(pdfBuffer);
+
+    // ✅ Delete file after reading
+    fs.unlinkSync(req.file.path);
+
+    // ✅ If extraction failed
+    if (!extractionResult.success || !extractionResult.data) {
+      return res.status(422).json({
+        success: false,
+        message: 'Failed to extract data from payslip',
+        error: extractionResult.error || 'Extraction returned no data',
+        processingTime: extractionResult.processingTime
+      });
+    }
+
+    const extractedData = extractionResult.data;
+
+    // ✅ Same logic as before (no change here)
+    // Safely parse paymentDate (handle string | null)
+    const rawDate = extractedData.paymentDate;
+    if (rawDate == null) {
+      return res.status(422).json({
+        success: false,
+        message: 'Payslip paymentDate is missing',
+        extracted: extractedData
+      });
+    }
+    const payslipDate = new Date(rawDate);
+    if (Number.isNaN(payslipDate.getTime())) {
+      return res.status(422).json({
+        success: false,
+        message: 'Invalid payslip paymentDate',
+        extracted: extractedData
+      });
+    }
     const currentDate = new Date();
     const daysDifference = Math.floor(
       (currentDate.getTime() - payslipDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    const meetsIncomeRequirement = extractedData.grossPay >= amountToProve;
+    // Validate grossPay presence and numeric value
+    const rawGrossPay = extractedData.grossPay;
+    const grossPay = typeof rawGrossPay === 'number' ? rawGrossPay : parseFloat(String(rawGrossPay));
+    if (rawGrossPay == null || Number.isNaN(grossPay)) {
+      return res.status(422).json({
+        success: false,
+        message: 'Payslip grossPay is missing or invalid',
+        extracted: extractedData
+      });
+    }
+
+    const meetsIncomeRequirement = grossPay >= amountToProve;
     const isWithin60Days = daysDifference <= 60 && daysDifference >= 0;
     const verified = meetsIncomeRequirement && isWithin60Days;
 
@@ -97,7 +144,7 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       verified: verified,
       extracted: extractedData,
       validation: {
-        grossPay: extractedData.grossPay,
+        grossPay: grossPay,
         requiredAmount: amountToProve,
         meetsIncomeRequirement: meetsIncomeRequirement,
         daysSincePayslip: daysDifference,
@@ -107,14 +154,11 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
             ? `Payslip date is in the future`
             : `Payslip is ${daysDifference} days old (must be within last 60 days)`
           : !meetsIncomeRequirement
-            ? `Gross pay £${extractedData.grossPay} is below £${amountToProve}`
+            ? `Gross pay £${grossPay} is below £${amountToProve}`
             : "✅ All requirements met"
       },
       timestamp: new Date().toISOString()
     });
-
-    fs.unlinkSync(req.file.path);
-
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ Payslip proof generation error:', errMsg);

@@ -1,7 +1,8 @@
+import './config/env'; // Load environment variables
+import './config/env'; // Load environment variables
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
@@ -13,8 +14,6 @@ import { UserAccountManager } from './services/UserAccountManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-dotenv.config({ path: join(__dirname, '../../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
