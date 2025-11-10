@@ -83,6 +83,7 @@ export function useLoginValidation() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password
