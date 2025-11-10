@@ -3,7 +3,7 @@ import { VertexAI, SchemaType } from '@google-cloud/vertexai';
 import { PayslipJSON, ExtractionResult } from '../types/payslip.types';
 
 const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT!;
-const LOCATION = process.env.VERTEX_AI_LOCATION || 'europe-west2';
+const LOCATION = process.env.VERTEX_AI_LOCATION || 'us-central1';
 
 export class VertexPayslipExtractor {
   private vertexAI: VertexAI;
@@ -16,7 +16,7 @@ export class VertexPayslipExtractor {
     });
 
     this.model = this.vertexAI.preview.getGenerativeModel({
-      model: 'gemini-1.5-flash-002',
+      model: 'gemini-2.0-flash-001',
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 512,
@@ -69,7 +69,7 @@ export class VertexPayslipExtractor {
         ],
       });
 
-      const responseText = result.response.text();
+      const responseText = result.response.candidates[0].content.parts[0].text;
       const extractedData: PayslipJSON = JSON.parse(responseText);
 
       const processingTime = Date.now() - startTime;

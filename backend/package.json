@@ -6,7 +6,7 @@
 
   "scripts": {
     "build": "tsc",
-    "start": "node dist/App.js",
+    "start": "node --env-file=../.env dist/App.js",
     "dev": "npm run build && npm start"
   },
   "dependencies": {

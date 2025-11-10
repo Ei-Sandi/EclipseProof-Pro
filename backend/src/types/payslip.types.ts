@@ -1,5 +1,3 @@
-// src/types/payslip.types.ts
-
 export interface PayslipJSON {
   grossPay: number | null;
   netPay?: number | null;
