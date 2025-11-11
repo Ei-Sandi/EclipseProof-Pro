@@ -1,4 +1,3 @@
-// src/services/vertex-payslip-extractor.ts
 import { VertexAI, SchemaType } from '@google-cloud/vertexai';
 import { PayslipJSON, ExtractionResult } from '../types/payslip.types';
 
@@ -40,9 +39,6 @@ export class VertexPayslipExtractor {
     console.log(`✅ Vertex AI initialized: ${PROJECT_ID} (${LOCATION})`);
   }
 
-  /**
-   * Extract payslip data from a single PDF
-   */
   async extractFromPDF(pdfBuffer: Buffer): Promise<ExtractionResult> {
     const startTime = Date.now();
 
@@ -101,15 +97,9 @@ export class VertexPayslipExtractor {
 Extract the following information from this payslip PDF:
 
 Required Fields:
-- grossPay: Total gross pay amount (number only)
-- paymentDate: Payment date in YYYY-MM-DD format
-
-Optional Fields:
-- netPay
 - employeeName
-- employerId
-- taxAmount
-- niAmount
+- netPay
+- paymentDate: Payment date in YYYY-MM-DD format
 
 Rules:
 1. If a value is missing, return null.
