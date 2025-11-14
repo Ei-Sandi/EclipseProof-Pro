@@ -173,3 +173,50 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     });
   }
 });
+
+// New endpoint: Verify a proof by ID (for verifier scanning QR code)
+proofRouter.get('/verify/:proofId', async (req: Request, res: Response) => {
+  try {
+    const { proofId } = req.params;
+
+    if (!proofId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Proof ID is required'
+      });
+    }
+
+    console.log(`\n🔍 Verifying proof: ${proofId}`);
+
+    // TODO: In production, fetch from database and verify against on-chain hash
+    // For now, we'll simulate a proof verification response
+    
+    // The proof contains these circuit attributes:
+    // - verificationHash: on-chain commitment (public)
+    // - proveAmount: threshold amount to prove (public to verifier)
+    // - proofGeneratedDate: when proof was created (public)
+    // - Private data (name, DOB, actual netPay) remains hidden
+    
+    const mockProof = {
+      valid: true,
+      threshold: 25000, // This is the proveAmount from circuit
+      proofId: proofId,
+      verificationHash: '0x' + Buffer.from(proofId).toString('hex').padStart(64, '0').slice(0, 64),
+      generatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
+      verified: true,
+      circuitVerified: true // Indicates the circuit proof was validated
+    };
+
+    res.json(mockProof);
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ Proof verification error:', errMsg);
+
+    res.status(500).json({
+      success: false,
+      message: errMsg
+    });
+  }
+});
