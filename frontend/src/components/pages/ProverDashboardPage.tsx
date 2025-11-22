@@ -10,6 +10,7 @@ import PayslipUploadStep from '../dashboard/steps/PayslipUploadStep';
 import ProofGenerationStep from '../dashboard/steps/ProofGenerationStep';
 import ProofModal from '../dashboard/proof/ProofModal';
 import ProofSuccessCard from '../dashboard/proof/ProofSuccessCard';
+import ProofLoadingAnimation from '../dashboard/proof/ProofLoadingAnimation';
 
 export default function EclipseProofDashboard(): React.JSX.Element {
     const { user, logout } = useAuth();
@@ -19,6 +20,7 @@ export default function EclipseProofDashboard(): React.JSX.Element {
         formData,
         generatedProof,
         showProofModal,
+        isGenerating,
         setShowProofModal,
         handleInputChange,
         handleFileUpload,
@@ -117,6 +119,9 @@ export default function EclipseProofDashboard(): React.JSX.Element {
                     onDownload={downloadProof}
                 />
             )}
+
+            {/* Loading Animation */}
+            <ProofLoadingAnimation isOpen={isGenerating} />
         </div>
     );
 }
