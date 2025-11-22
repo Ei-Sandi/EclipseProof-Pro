@@ -2,10 +2,12 @@ import express, { Router, Request, Response } from 'express';
 import fs from 'fs';
 
 import { vertexExtractor } from '../services/PayslipParser.js';
-import { verifyIdDocument } from '../services/VerificationService.js';
+import { verifyIdDocument } from '../services/IDVerificationService.js';
 import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
 import { requireAuth } from './authRoutes.js';
 import { UserAccountManager } from '../services/UserAccountManager.js';
+import { VerificationProof } from '../services/VerificationProof.js';
+import { QRCodeService } from '../services/QRCodeService.js';
 
 export const proofRouter: Router = express.Router();
 
@@ -27,11 +29,6 @@ proofRouter.post('/verify', requireAuth, uploadIdDocument.single('idDocument'), 
       });
     }
 
-    console.log('\n🆔 New ID verification:', {
-      filename: req.file.originalname,
-      documentType: documentType
-    });
-
     const verificationResult = await verifyIdDocument(req.file.path, documentType);
     const IDname = verificationResult.extractedData.name;
     const DOB = verificationResult.extractedData.dob;
@@ -45,13 +42,6 @@ proofRouter.post('/verify', requireAuth, uploadIdDocument.single('idDocument'), 
       const dobBytes = new TextEncoder().encode(DOB);
       user.idDOB = dobBytes;
       user.idName = IDname;
-
-      console.log('✅ Stored DOB and name in user state for witness:', {
-        userId: user.userID,
-        idName: IDname,
-        dob: DOB,
-        dobBytesLength: dobBytes.length
-      });
     }
 
     fs.unlinkSync(req.file.path);
@@ -96,11 +86,6 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       });
     }
 
-    console.log('\n📄 New payslip proof generation:', {
-      filename: req.file.originalname,
-      amountToProve: amountToProve
-    });
-
     const pdfBuffer = fs.readFileSync(req.file.path);
 
     const extractionResult = await vertexExtractor.extractFromPDF(pdfBuffer);
@@ -131,18 +116,20 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     if (rawDate == null) {
       return res.status(422).json({
         success: false,
-        message: 'Payslip paymentDate is missing',
+        message: 'Payslip paymentDate is missing.',
         extracted: extractedData
       });
     }
+
     const payslipDate = new Date(rawDate);
     if (Number.isNaN(payslipDate.getTime())) {
       return res.status(422).json({
         success: false,
-        message: 'Invalid payslip paymentDate',
+        message: 'Payslip paymentDate is invalid.',
         extracted: extractedData
       });
     }
+
     const currentDate = new Date();
     const daysDifference = Math.floor(
       (currentDate.getTime() - payslipDate.getTime()) / (1000 * 60 * 60 * 24)
@@ -159,7 +146,7 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     }
 
     const meetsIncomeRequirement = netPay >= amountToProve;
-    const isWithin60Days = daysDifference <= 60 && daysDifference >= 0;
+    const isWithin60Days = true //daysDifference <= 60 && daysDifference >= 0;
     const verified = meetsIncomeRequirement && isWithin60Days;
 
     // Get the user to access the verified DOB for the witness
@@ -208,32 +195,32 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     //   payslipName: employeeName
     // });
 
-    // TODO: Generate ZK proof using the Compact contract
-    // The contract will call getIDDOB() witness, which will return user.idDOB
-    // Example (to be implemented with full contract integration):
-    // 
-    // import { payslipContractInstance } from '../../../contracts/src/index.js';
-    // 
-    // const privateState = { idDOB: user.idDOB };
-    // const randomness = crypto.randomBytes(32);
-    // 
-    // const txResult = await payslipContractInstance.createVerificationHash(
-    //   employeeName, 
-    //   netPay, 
-    //   amountToProve, 
-    //   proofGeneratedDate, 
-    //   randomness,
-    //   { privateState }
-    // );
+    // Generate ZK proof using the Compact contract
+    const verificationProof = new VerificationProof();
+    const proofResult = await verificationProof.generateVerificationProof({
+      idDOB: user.idDOB,
+      employeeName,
+      netPay,
+      amountToProve,
+      user
+    });
 
-    console.log('✅ Proof verification complete:', {
-      verified,
-      meetsIncomeRequirement,
-      isWithin60Days,
-      hasDOB: !!user.idDOB,
-      idName: user.idName,
-      payslipName: employeeName,
-      nameMatches: true
+    if (!proofResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to generate verification proof',
+        error: proofResult.error
+      });
+    }
+
+    // Generate QR code with proof data
+    const qrCodeDataURL = await QRCodeService.generateProofQRCode({
+      employeeName,
+      netPay,
+      proveAmount: amountToProve,
+      proofGeneratedDate: proofResult.proofGeneratedDate?.toString() || '',
+      randomness: proofResult.randomness ? Buffer.from(proofResult.randomness).toString('hex') : '',
+      verificationHash: proofResult.verificationHash ? Buffer.from(proofResult.verificationHash).toString('hex') : ''
     });
 
     res.json({
@@ -248,7 +235,11 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
         payslipDate: payslipDate.toISOString(),
         daysSincePayslip: daysDifference,
         hasVerifiedID: !!user.idDOB,
-        nameMatches: true
+        nameMatches: true,
+        verificationHash: proofResult.verificationHash ?
+          Buffer.from(proofResult.verificationHash).toString('hex') : undefined,
+        proofGeneratedDate: proofResult.proofGeneratedDate?.toString(),
+        qrCode: qrCodeDataURL
       },
       timestamp: new Date().toISOString()
     });

@@ -86,6 +86,33 @@ export default function ProofModal({
                             </div>
                         </div>
 
+                        {/* QR Code Section */}
+                        {proof.qrCode && (
+                            <div className="bg-white border border-slate-200 rounded-lg p-6">
+                                <h4 className="font-semibold text-slate-900 mb-4 text-center">Verification QR Code</h4>
+                                <div className="flex flex-col items-center">
+                                    <div className="bg-white p-4 rounded-lg border-2 border-slate-200">
+                                        <img
+                                            src={proof.qrCode}
+                                            alt="Proof Verification QR Code"
+                                            className="w-64 h-64"
+                                        />
+                                    </div>
+                                    <p className="text-sm text-slate-600 mt-4 text-center">
+                                        Scan this QR code to verify the proof on any device
+                                    </p>
+                                    {proof.verificationHash && (
+                                        <div className="mt-3 w-full">
+                                            <p className="text-xs text-slate-500 mb-1">Verification Hash:</p>
+                                            <p className="font-mono text-xs text-slate-700 break-all bg-slate-50 p-2 rounded">
+                                                {proof.verificationHash}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Verification URL */}
                         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
                             <p className="text-sm text-slate-600 mb-2">Verification URL:</p>
