@@ -99,7 +99,10 @@ export function useProofGeneration() {
                 requiredAmount: formData.proofAmount,
                 verified: proofResult.verified,
                 generatedAt: proofResult.timestamp || new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                verificationHash: proofResult.proofDetails?.verificationHash,
+                proofGeneratedDate: proofResult.proofDetails?.proofGeneratedDate,
+                qrCode: proofResult.proofDetails?.qrCode
             };
 
             setGeneratedProof(proof);

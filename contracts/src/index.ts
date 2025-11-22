@@ -1,5 +1,5 @@
 import { Contract } from '../managed/ep-contract/contract/index.cjs';
-import { witnesses, createPaySlipPrivateState, PayslipPrivateState } from './witnesses';
+import { witnesses, createPaySlipPrivateState, PayslipPrivateState } from './witnesses.js';
 import type { CircuitContext } from '@midnight-ntwrk/compact-runtime';
 
 export function makePayslipContract(privateDOB: Uint8Array) {
@@ -19,7 +19,7 @@ export function makePayslipContract(privateDOB: Uint8Array) {
  * @param ctx - Circuit context (optional, will create minimal context if not provided)
  * @returns Object containing the verification hash, updated context, and proof data
  */
-export async function createVerificationHash(
+export async function createProofHash(
     idDOB: Uint8Array,
     payslipName: bigint,
     netPay: bigint,

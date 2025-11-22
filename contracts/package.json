@@ -1,6 +1,7 @@
 {
   "name": "ep-contract",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "compile": "compact compile src/ep-contract.compact managed/ep-contract",
     "build": "tsc"
