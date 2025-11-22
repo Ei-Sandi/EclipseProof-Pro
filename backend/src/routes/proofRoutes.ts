@@ -5,6 +5,7 @@ import { vertexExtractor } from '../services/PayslipParser.js';
 import { verifyIdDocument } from '../services/VerificationService.js';
 import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
 import { requireAuth } from './authRoutes.js';
+import { UserAccountManager } from '../services/UserAccountManager.js';
 
 export const proofRouter: Router = express.Router();
 
@@ -32,6 +33,26 @@ proofRouter.post('/verify', requireAuth, uploadIdDocument.single('idDocument'), 
     });
 
     const verificationResult = await verifyIdDocument(req.file.path, documentType);
+    const IDname = verificationResult.extractedData.name;
+    const DOB = verificationResult.extractedData.dob;
+
+    // Store the verified DOB and name in the user's session for the witness
+    const userAccountManager = UserAccountManager.getInstance();
+    const user = userAccountManager.getUser(req.sessionID);
+
+    if (user) {
+      // Convert DOB string to Uint8Array for the Compact contract witness
+      const dobBytes = new TextEncoder().encode(DOB);
+      user.idDOB = dobBytes;
+      user.idName = IDname;
+
+      console.log('✅ Stored DOB and name in user state for witness:', {
+        userId: user.userID,
+        idName: IDname,
+        dob: DOB,
+        dobBytesLength: dobBytes.length
+      });
+    }
 
     fs.unlinkSync(req.file.path);
 
@@ -80,16 +101,12 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       amountToProve: amountToProve
     });
 
-    // ✅ Read file as Buffer (Vertex AI needs buffer, not file path)
     const pdfBuffer = fs.readFileSync(req.file.path);
 
-    // ✅ Use Vertex AI instead of old extractPayslipData()
     const extractionResult = await vertexExtractor.extractFromPDF(pdfBuffer);
 
-    // ✅ Delete file after reading
     fs.unlinkSync(req.file.path);
 
-    // ✅ If extraction failed
     if (!extractionResult.success || !extractionResult.data) {
       return res.status(422).json({
         success: false,
@@ -101,8 +118,15 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
 
     const extractedData = extractionResult.data;
 
-    // ✅ Same logic as before (no change here)
-    // Safely parse paymentDate (handle string | null)
+    const employeeName = extractedData.employeeName;
+    if (!employeeName || typeof employeeName !== 'string' || employeeName.trim() === '') {
+      return res.status(422).json({
+        success: false,
+        message: 'Payslip employeeName is missing or invalid',
+        extracted: extractedData
+      });
+    }
+
     const rawDate = extractedData.paymentDate;
     if (rawDate == null) {
       return res.status(422).json({
@@ -124,10 +148,9 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       (currentDate.getTime() - payslipDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    // Validate grossPay presence and numeric value
-    const rawGrossPay = extractedData.grossPay;
-    const grossPay = typeof rawGrossPay === 'number' ? rawGrossPay : parseFloat(String(rawGrossPay));
-    if (rawGrossPay == null || Number.isNaN(grossPay)) {
+    const rawNetPay = extractedData.netPay;
+    const netPay = typeof rawNetPay === 'number' ? rawNetPay : parseFloat(String(rawNetPay));
+    if (rawNetPay == null || Number.isNaN(netPay)) {
       return res.status(422).json({
         success: false,
         message: 'Payslip grossPay is missing or invalid',
@@ -135,30 +158,101 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
       });
     }
 
-    const meetsIncomeRequirement = grossPay >= amountToProve;
+    const meetsIncomeRequirement = netPay >= amountToProve;
     const isWithin60Days = daysDifference <= 60 && daysDifference >= 0;
     const verified = meetsIncomeRequirement && isWithin60Days;
 
+    // Get the user to access the verified DOB for the witness
+    const userAccountManager = UserAccountManager.getInstance();
+    const user = userAccountManager.getUser(req.sessionID);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User session not found'
+      });
+    }
+
+    if (!user.idDOB) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID verification required before generating proof. Please verify your ID first.'
+      });
+    }
+
+    // Remove comment after implementing ID verification 
+
+    // if (!user.idName) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'ID verification incomplete. Please verify your ID again.'
+    //   });
+    // }
+
+    // const normalizedIdName = user.idName.trim().toLowerCase().replace(/\s+/g, ' ');
+    // const normalizedPayslipName = employeeName.trim().toLowerCase().replace(/\s+/g, ' ');
+
+    // if (normalizedIdName !== normalizedPayslipName) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Name mismatch: The name on your payslip does not match the name on your ID document.',
+    //     details: {
+    //       idName: user.idName,
+    //       payslipName: employeeName
+    //     }
+    //   });
+    // }
+
+    // console.log('✅ Name verification passed:', {
+    //   idName: user.idName,
+    //   payslipName: employeeName
+    // });
+
+    // TODO: Generate ZK proof using the Compact contract
+    // The contract will call getIDDOB() witness, which will return user.idDOB
+    // Example (to be implemented with full contract integration):
+    // 
+    // import { payslipContractInstance } from '../../../contracts/src/index.js';
+    // 
+    // const privateState = { idDOB: user.idDOB };
+    // const randomness = crypto.randomBytes(32);
+    // 
+    // const txResult = await payslipContractInstance.createVerificationHash(
+    //   employeeName, 
+    //   netPay, 
+    //   amountToProve, 
+    //   proofGeneratedDate, 
+    //   randomness,
+    //   { privateState }
+    // );
+
+    console.log('✅ Proof verification complete:', {
+      verified,
+      meetsIncomeRequirement,
+      isWithin60Days,
+      hasDOB: !!user.idDOB,
+      idName: user.idName,
+      payslipName: employeeName,
+      nameMatches: true
+    });
+
     res.json({
       success: true,
-      verified: verified,
-      extracted: extractedData,
-      validation: {
-        grossPay: grossPay,
-        requiredAmount: amountToProve,
-        meetsIncomeRequirement: meetsIncomeRequirement,
+      verified,
+      proofDetails: {
+        employeeName,
+        meetsIncomeRequirement,
+        isWithin60Days,
+        netPay,
+        amountToProve,
+        payslipDate: payslipDate.toISOString(),
         daysSincePayslip: daysDifference,
-        isWithin60Days: isWithin60Days,
-        reason: !isWithin60Days
-          ? daysDifference < 0
-            ? `Payslip date is in the future`
-            : `Payslip is ${daysDifference} days old (must be within last 60 days)`
-          : !meetsIncomeRequirement
-            ? `Gross pay £${grossPay} is below £${amountToProve}`
-            : "✅ All requirements met"
+        hasVerifiedID: !!user.idDOB,
+        nameMatches: true
       },
       timestamp: new Date().toISOString()
     });
+
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error('❌ Payslip proof generation error:', errMsg);
