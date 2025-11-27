@@ -1,4 +1,4 @@
-import { CheckCircle, Eye, Download } from 'lucide-react';
+import { CheckCircle, Eye, Download, QrCode } from 'lucide-react';
 
 interface ProofSuccessCardProps {
     onViewProof: () => void;
@@ -17,8 +17,12 @@ export default function ProofSuccessCard({
                 </div>
                 <div>
                     <h3 className="text-2xl font-bold text-slate-900">Proof Generated Successfully!</h3>
-                    <p className="text-slate-700">Your income proof is ready to download and share</p>
+                    <p className="text-slate-700">Your income proof with QR code is ready to download and share</p>
                 </div>
+            </div>
+            <div className="mb-4 flex items-center gap-2 text-slate-600">
+                <QrCode className="w-5 h-5 text-cyan-500" />
+                <span className="text-sm">Includes scannable QR code for easy verification</span>
             </div>
             <div className="flex gap-4">
                 <button

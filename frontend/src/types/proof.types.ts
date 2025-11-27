@@ -22,6 +22,9 @@ export interface Proof {
     verified: boolean;
     generatedAt: string;
     expiresAt: string;
+    verificationHash?: string;
+    proofGeneratedDate?: string;
+    qrCode?: string;
 }
 
 export interface StepStatus {

@@ -13,6 +13,7 @@ export function useProofGeneration() {
 
     const [generatedProof, setGeneratedProof] = useState<Proof | null>(null);
     const [showProofModal, setShowProofModal] = useState<boolean>(false);
+    const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target as HTMLInputElement & HTMLSelectElement;
@@ -31,6 +32,8 @@ export function useProofGeneration() {
 
     const handleGenerateProof = async (e: FormEvent, onSuccess?: () => void) => {
         e.preventDefault();
+
+        setIsGenerating(true);
 
         try {
             if (!formData.documentType || !formData.idFile) {
@@ -99,7 +102,10 @@ export function useProofGeneration() {
                 requiredAmount: formData.proofAmount,
                 verified: proofResult.verified,
                 generatedAt: proofResult.timestamp || new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                verificationHash: proofResult.proofDetails?.verificationHash,
+                proofGeneratedDate: proofResult.proofDetails?.proofGeneratedDate,
+                qrCode: proofResult.proofDetails?.qrCode
             };
 
             setGeneratedProof(proof);
@@ -113,6 +119,8 @@ export function useProofGeneration() {
             const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
             console.error('❌ Proof generation error:', errorMessage);
             alert('Error: ' + errorMessage);
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -150,6 +158,7 @@ To verify this proof, visit: https://eclipseproof.com/verify/${generatedProof.id
         formData,
         generatedProof,
         showProofModal,
+        isGenerating,
         setShowProofModal,
         handleInputChange,
         handleFileUpload,
