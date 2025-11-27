@@ -27,8 +27,12 @@ export default function LandingPage() {
               Get Started Free
               <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="px-8 py-4 bg-cyan-100 text-slate-900 text-lg rounded-lg hover:bg-cyan-200 transition-all border border-cyan-300">
-              Learn More
+            <button 
+              onClick={() => navigate('/verify')}
+              className="px-8 py-4 bg-cyan-100 text-slate-900 text-lg rounded-lg hover:bg-cyan-200 transition-all border border-cyan-300 flex items-center gap-2"
+            >
+              <Shield className="w-5 h-5" />
+              Verify Proof
             </button>
           </div>
         </div>
