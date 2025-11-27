@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { CheckCircle, XCircle, Clock, Shield, AlertTriangle } from 'lucide-react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { CheckCircle, XCircle, Clock, Shield, AlertTriangle, QrCode, Upload } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface ProofVerification {
   valid: boolean;
@@ -16,41 +17,144 @@ interface ProofVerification {
 export default function VerifierPage() {
   const { proofId } = useParams<{ proofId: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [verification, setVerification] = useState<ProofVerification | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [qrInput, setQrInput] = useState('');
 
   useEffect(() => {
-    const verifyProof = async () => {
+    const id = proofId || searchParams.get('id');
+    if (id) {
+      verifyProof(id);
+    }
+  }, [proofId, searchParams]);
+
+  const verifyProof = async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Call verification API
+      const response = await fetch(`/api/proof/verify/${id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify proof');
+      }
+
+      const data = await response.json();
+      setVerification(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (qrInput.trim()) {
+      // If input is a full URL, extract the ID
+      const id = qrInput.includes('/verify/') 
+        ? qrInput.split('/verify/')[1] 
+        : qrInput;
+      
+      navigate(`/verify/${id}`);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
-
-        // Get proof ID from URL params or query string
-        const id = proofId || searchParams.get('id');
+        const html5QrCode = new Html5Qrcode("qr-reader-hidden");
+        const decodedText = await html5QrCode.scanFile(file, true);
         
-        if (!id) {
-          throw new Error('No proof ID provided');
-        }
-
-        // Call verification API
-        const response = await fetch(`/api/proof/verify/${id}`);
+        const id = decodedText.includes('/verify/') 
+          ? decodedText.split('/verify/')[1] 
+          : decodedText;
         
-        if (!response.ok) {
-          throw new Error('Failed to verify proof');
-        }
-
-        const data = await response.json();
-        setVerification(data);
+        navigate(`/verify/${id}`);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Verification failed');
-      } finally {
+        console.error(err);
+        setError('Could not read QR code from image. Please ensure it is clear.');
         setLoading(false);
       }
-    };
+    }
+  };
 
-    verifyProof();
-  }, [proofId, searchParams]);
+  // Initial State: No proof ID provided, show upload/input UI
+  if (!proofId && !searchParams.get('id')) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-8 h-8 text-indigo-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Verify a Proof</h1>
+            <p className="text-gray-600">Enter a proof ID or scan a QR code to verify an income proof.</p>
+          </div>
+
+          <form onSubmit={handleManualSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="proofId" className="block text-sm font-medium text-gray-700 mb-1">
+                Proof ID or URL
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <QrCode className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="proofId"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Paste proof ID here..."
+                  value={qrInput}
+                  onChange={(e) => setQrInput(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Verify Proof
+            </button>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or upload QR code</span>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Click to upload QR image</p>
+                </div>
+                <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+              </label>
+            </div>
+            <div id="qr-reader-hidden" className="hidden"></div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+            <p className="text-xs text-gray-500">
+              Powered by EclipseProof Zero-Knowledge Verification
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
