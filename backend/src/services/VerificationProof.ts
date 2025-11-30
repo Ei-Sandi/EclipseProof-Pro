@@ -93,7 +93,7 @@ export class VerificationProof {
             });
 
             // Convert Bech32m coinPublicKey to hex format for constructorContext
-            const coinPublicKeyHex = parseCoinPublicKeyToHex(coinPublicKey, NetworkId.TestNet);
+            const coinPublicKeyHex = parseCoinPublicKeyToHex(coinPublicKey, NetworkId.TestNet.toString());
 
             const ctorCtx = constructorContext(initialPrivateState, coinPublicKeyHex);
 

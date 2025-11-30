@@ -11,7 +11,9 @@
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
     "@google/generative-ai": "^0.24.1",
+    "@midnight-ntwrk/compact-runtime": "^0.9.0",
     "@midnight-ntwrk/ledger": "^4.0.0",
+    "@midnight-ntwrk/midnight-js-utils": "^3.0.0-alpha.6",
     "@midnight-ntwrk/wallet": "5.0.0",
     "@midnight-ntwrk/wallet-api": "5.0.0",
     "@midnight-ntwrk/wallet-sdk-hd": "^2.0.0",
@@ -24,7 +26,9 @@
     "express-session": "^1.18.2",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.27"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -34,7 +38,7 @@
     "@types/express-session": "^1.18.2",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.0",
-    "@types/pg": "^8.15.5",
+    "@types/pg": "^8.15.6",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
