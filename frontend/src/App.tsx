@@ -7,6 +7,7 @@ import LandingPage from './components/pages/LandingPage';
 import LoginPage from './components/pages/LoginPage';
 import RegisterPage from './components/pages/RegisterPage';
 import ProverDashboardPage from './components/pages/ProverDashboardPage';
+import VerifierPage from './components/pages/VerifierPage';
 
 export default function EclipseProofApp() {
   return (
@@ -27,6 +28,8 @@ export default function EclipseProofApp() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/verify/:proofId" element={<VerifierPage />} />
+            <Route path="/verify" element={<VerifierPage />} />
           </Routes>
 
           <Footer />
