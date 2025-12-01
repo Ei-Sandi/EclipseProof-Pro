@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     },
     PROOF: {
         VERIFY: `${API_BASE_URL}/api/proof/verify`,
+        VERIFY_QR: `${API_BASE_URL}/api/proof/verify-qr`,
         GENERATE: `${API_BASE_URL}/api/proof/generate`,
     }
 } as const;
