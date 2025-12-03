@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import { vertexExtractor } from '../services/PayslipParser.js';
 import { verifyIdDocument } from '../services/IDVerificationService.js';
-import { uploadIdDocument, uploadPayslip } from '../config/multerConfig.js';
+import { uploadImageDocument, uploadPayslip } from '../config/multerConfig.js';
 import { requireAuth } from './authRoutes.js';
 import { UserAccountManager } from '../services/UserAccountManager.js';
 import { VerificationProof } from '../services/VerificationProof.js';
@@ -11,7 +11,7 @@ import { QRCodeService } from '../services/QRCodeService.js';
 
 export const proofRouter: Router = express.Router();
 
-proofRouter.post('/verify', requireAuth, uploadIdDocument.single('idDocument'), async (req: Request, res: Response) => {
+proofRouter.post('/verify', requireAuth, uploadImageDocument.single('idDocument'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -190,7 +190,7 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     //   });
     // }
 
-    // console.log('✅ Name verification passed:', {
+    // console.log('Name verification passed:', {
     //   idName: user.idName,
     //   payslipName: employeeName
     // });
@@ -214,14 +214,13 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
     }
 
     // Generate QR code with proof data
-    const qrCodeDataURL = await QRCodeService.generateProofQRCode({
-      employeeName,
-      netPay,
-      proveAmount: amountToProve,
-      proofGeneratedDate: proofResult.proofGeneratedDate?.toString() || '',
-      randomness: proofResult.randomness ? Buffer.from(proofResult.randomness).toString('hex') : '',
-      verificationHash: proofResult.verificationHash ? Buffer.from(proofResult.verificationHash).toString('hex') : ''
-    });
+    const baseUrl = (process.env.FRONTEND_URL ? process.env.FRONTEND_URL + '/verify' : 'http://localhost:5173/verify');
+
+    const qrCodeDataURL = await QRCodeService.generateVerificationQR(
+      baseUrl,
+      proofResult.requestId,
+      proofResult.salt
+    );
 
     res.json({
       success: true,
@@ -236,9 +235,8 @@ proofRouter.post('/generate', requireAuth, uploadPayslip.single('payslip'), asyn
         daysSincePayslip: daysDifference,
         hasVerifiedID: !!user.idDOB,
         nameMatches: true,
-        verificationHash: proofResult.verificationHash ?
-          Buffer.from(proofResult.verificationHash).toString('hex') : undefined,
-        proofGeneratedDate: proofResult.proofGeneratedDate?.toString(),
+        requestId: proofResult.requestId,
+        salt: proofResult.salt,
         qrCode: qrCodeDataURL
       },
       timestamp: new Date().toISOString()

@@ -1,52 +1,64 @@
-pragma language_version >= 0.16 && <= 0.17;
+pragma language_version 0.18;
 
 import CompactStandardLibrary;
 
-// Public ledger declarations
-export ledger payslipVerificationHash: Bytes<32>;
-
-// Witness declarations for private data
-witness getIDDOB(): Bytes<32>;
-
-// Step 1: Create verification hash
-export circuit createVerificationHash(
-  payslipName: Field,
-  netPay: Field,
-  proveAmount: Field,
-  proofGeneratedDate: Field,
-  randomness: Bytes<32>
-): Bytes<32> {
-  // Get private data via witnesses
-  const storedDOB = getIDDOB();
-  
-  // Create commitment
-  const verificationHash = persistentCommit<Vector<5, Bytes<32>>>(
-    [payslipName as Bytes<32>, storedDOB, netPay as Bytes<32>, proveAmount as Bytes<32>, proofGeneratedDate as Bytes<32>],
-    randomness
-  );
-  
-  // Store hash on-chain
-  payslipVerificationHash = disclose(verificationHash);
-  
-  return disclose(verificationHash);
+// Private payslip data supplied off-chain via a witness
+struct PayslipWitness {
+  name: Bytes<32>;
+  dob: Bytes<32>;
+  netPay: Uint<64>;
+  salt: Bytes<32>;
 }
 
-// Step 2: Verifier checks against the stored hash
-export circuit verifyAgainstHash(
-  verifierName: Bytes<32>,
-  verifierDOB: Bytes<32>,
-  verifierNetPay: Field,
-  verifierProveAmount: Field,
-  proofGeneratedDate: Field,
-  verificationHash: Bytes<32>,
-  randomness: Bytes<32>
-): Boolean {
-  // Recompute the commitment using verifier's inputs
-  const recomputedHash = persistentCommit<Vector<5, Bytes<32>>>(
-    [verifierName, verifierDOB, verifierNetPay as Bytes<32>, verifierProveAmount as Bytes<32>, proofGeneratedDate as Bytes<32>],
-    randomness
-  );
+// What we store on-chain per request
+struct VerificationResult {
+  identityHash: Bytes<32>; // fingerprint for (name, dob[, salt...])
+  provenLimit: Uint<64>;   // income limit that was actually checked
+}
+
+witness getPayslip(): PayslipWitness;
+
+// Map<RequestId, VerificationResult>
+export ledger verifications: Map<Bytes<32>, VerificationResult>;
+
+// Helper circuit
+circuit identityFingerprint(name: Bytes<32>, dob: Bytes<32>): Bytes<32> {
+  const payload: Vector<3, Bytes<32>> =
+    [ pad(32, "income-fp")   // domain separator
+    , name
+    , dob
+    ];
+  return persistentHash<Vector<3, Bytes<32>>>(payload);
+}
+
+// Generate circuit
+export circuit proveIncome(limit: Uint<64>, requestId: Bytes<32>): [] {
+  const payslip = getPayslip();
+
+  assert(payslip.netPay >= limit, "Income too low");
+
+  const fp = identityFingerprint(payslip.name, payslip.dob);
+
+  const result = VerificationResult {
+    identityHash: fp,
+    provenLimit: limit,
+  };
+
+  verifications.insert(disclose(requestId), disclose(result));
+}
+
+// Verify circuit 
+export circuit getVerifiedResult(
+  requestId: Bytes<32>,
+  name: Bytes<32>,
+  dob: Bytes<32>
+): VerificationResult {
+
+  const stored: VerificationResult = verifications.lookup(disclose(requestId));
   
-  // Compare to the on-chain hash
-  return recomputedHash == payslipVerificationHash && recomputedHash == verificationHash;
+  const expected = identityFingerprint(name, dob);
+
+  assert(stored.identityHash == expected, "identity mismatch");
+
+  return stored;
 }

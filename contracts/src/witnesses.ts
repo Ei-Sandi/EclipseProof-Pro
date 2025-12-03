@@ -1,20 +1,42 @@
 import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
-import type { Ledger, Witnesses as ContractWitnesses } from '../managed/ep-contract/contract/index.cjs';
+import type { Ledger, Witnesses } from '../managed/ep-contract/contract/index.d.cts';
 
-export type PayslipPrivateState = {
-  idDOB: Uint8Array;
+export type PrivateState = {
+  name: Uint8Array;
+  dob: Uint8Array;
+  netPay: bigint;
+  salt: Uint8Array;
 };
 
-export function createPaySlipPrivateState(idDOB: Uint8Array): PayslipPrivateState {
-  return { idDOB };
+export function createPrivateState(
+  name: Uint8Array,
+  dob: Uint8Array,
+  netPay: bigint,
+  salt: Uint8Array
+): PrivateState {
+  return { name, dob, netPay, salt };
 }
 
-export type PayslipWitnesses = ContractWitnesses<PayslipPrivateState>;
+export type PayslipWitness = {
+  name: Uint8Array;
+  dob: Uint8Array;
+  netPay: bigint;
+  salt: Uint8Array;
+};
 
-export const witnesses: PayslipWitnesses = {
-  getIDDOB: (
-    { privateState }: WitnessContext<Ledger, PayslipPrivateState>,
-  ): [PayslipPrivateState, Uint8Array] => {
-    return [privateState, privateState.idDOB];
+export const witnesses: Witnesses<PrivateState> = {
+  getPayslip(
+    context: WitnessContext<Ledger, PrivateState>
+  ): [PrivateState, PayslipWitness] {
+    const { privateState } = context;
+
+    const payslip: PayslipWitness = {
+      name: privateState.name,
+      dob: privateState.dob,
+      netPay: privateState.netPay,
+      salt: privateState.salt,
+    };
+
+    return [privateState, payslip];
   },
 };
