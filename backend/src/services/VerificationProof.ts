@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import type { CircuitContext } from '@midnight-ntwrk/compact-runtime';
-import { constructorContext, QueryContext, dummyContractAddress, StateValue } from '@midnight-ntwrk/compact-runtime';
+import { constructorContext } from '@midnight-ntwrk/compact-runtime';
 import { parseCoinPublicKeyToHex } from '@midnight-ntwrk/midnight-js-utils';
 import { NetworkId } from '@midnight-ntwrk/zswap';
 import type { User } from './User.js';
@@ -15,11 +15,8 @@ export interface ProofGenerationParams {
 
 export interface ProofGenerationResult {
     success: boolean;
-    verificationHash?: Uint8Array;
-    proofData?: any;
-    context?: CircuitContext<any>;
-    randomness?: Uint8Array;
-    proofGeneratedDate?: bigint;
+    requestId: string;
+    salt: string;
     error?: string;
 }
 
@@ -46,19 +43,16 @@ export class VerificationProof {
             // @ts-ignore - Contract module is compiled JavaScript without type definitions in dist
             const { Contract } = await import('../../../contracts/managed/ep-contract/contract/index.cjs');
             // @ts-ignore
-            const { witnesses, createPaySlipPrivateState } = await import('../../../contracts/dist/witnesses.js');
+            const { witnesses, createPrivateState } = await import('../../../contracts/dist/witnesses.js');
 
-            // Convert employee name to bigint (hash it for consistent representation)
+            // Convert employee name to Uint8Array (32 bytes)
             const nameHash = crypto.createHash('sha256').update(employeeName).digest();
-            const payslipNameBigInt = BigInt('0x' + nameHash.toString('hex'));
+            const nameBytes = new Uint8Array(nameHash);
 
             // Convert amounts to bigint (multiply by 100 to preserve 2 decimal places)
-            // Pad to 64 hex chars (32 bytes) for Bytes<32> type
-            const netPayHex = Math.round(netPay * 100).toString(16).padStart(64, '0');
-            const netPayBigInt = BigInt('0x' + netPayHex);
+            const netPayBigInt = BigInt(Math.round(netPay * 100));
 
-            const proveAmountHex = Math.round(amountToProve * 100).toString(16).padStart(64, '0');
-            const proveAmountBigInt = BigInt('0x' + proveAmountHex);
+            const proveAmountBigInt = BigInt(Math.round(amountToProve * 100));
 
             // Use current date as proof generation date in YYYYMMDD format as bigint
             const now = new Date();
@@ -66,12 +60,18 @@ export class VerificationProof {
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             const dateNumber = parseInt(year + month + day);
-            const dateHex = dateNumber.toString(16).padStart(64, '0');
-            const proofGeneratedDateBigInt = BigInt('0x' + dateHex);            // Generate 32-byte randomness for cryptographic security
+            const proofGeneratedDateBigInt = BigInt(dateNumber);
+
+            // Generate 32-byte randomness (salt) for cryptographic security
             const randomness = crypto.randomBytes(32);
 
-            // 1) Build initial private state
-            const initialPrivateState = createPaySlipPrivateState(paddedIdDOB);
+            // 1) Build initial private state with full payslip data
+            const initialPrivateState = createPrivateState(
+                nameBytes,
+                paddedIdDOB,
+                netPayBigInt,
+                randomness
+            );
 
             // 2) Build ConstructorContext using the user's wallet coinPublicKey
             const walletStateObservable = user.wallet.state();
@@ -147,23 +147,24 @@ export class VerificationProof {
             //     currentZswapLocalState
             // };
 
-            // 5) Call the circuit with context
-            const { result, context: newCtx, proofData } = contract.circuits.createVerificationHash(
+            // 5) Generate a unique request ID (32 bytes)
+            const requestId = crypto.randomBytes(32);
+
+            // 6) Call the proveIncome circuit to create the ZK proof
+            const proveIncomeResult = contract.circuits.proveIncome(
                 context,
-                payslipNameBigInt,
-                netPayBigInt,
                 proveAmountBigInt,
-                proofGeneratedDateBigInt,
-                randomness
+                requestId
             );
+
+            // 7) Convert requestId and salt to hex strings for QR code generation
+            const requestIdHex = Buffer.from(requestId).toString('hex');
+            const saltHex = Buffer.from(randomness).toString('hex');
 
             return {
                 success: true,
-                verificationHash: result,
-                proofData,
-                context: newCtx,
-                randomness,
-                proofGeneratedDate: proofGeneratedDateBigInt
+                requestId: requestIdHex,
+                salt: saltHex
             };
 
         } catch (error) {
@@ -171,6 +172,8 @@ export class VerificationProof {
             console.error('❌ ZK proof generation error:', errMsg);
             return {
                 success: false,
+                requestId: '',
+                salt: '',
                 error: errMsg
             };
         }

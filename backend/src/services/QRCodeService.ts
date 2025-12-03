@@ -1,45 +1,34 @@
 import QRCode from 'qrcode';
 
-export interface QRCodeData {
-    employeeName: string;
-    netPay: number;
-    proveAmount: number;
-    proofGeneratedDate: string;
-    randomness: string;
-    verificationHash: string;
-}
-
 export class QRCodeService {
-    /**
-     * Generate a QR code containing proof verification data
-     * @param data - The proof data to encode in the QR code
-     * @returns Base64 encoded QR code image
-     */
-    static async generateProofQRCode(data: QRCodeData): Promise<string> {
+    static async generateVerificationQR(
+        baseUrl: string,
+        requestId: string,
+        salt: string
+    ): Promise<string> {
+        const params = new URLSearchParams({
+            requestId: requestId,
+            salt: salt
+        });
+
+        const fullUrl = `${baseUrl}?${params.toString()}`;
+
         try {
-            // Create a JSON string with the proof data
-            const qrData = JSON.stringify({
-                name: data.employeeName,
-                netPay: data.netPay,
-                proveAmount: data.proveAmount,
-                date: data.proofGeneratedDate,
-                randomness: data.randomness,
-                hash: data.verificationHash
-            });
-
-            // Generate QR code as a base64 data URL
-            const qrCodeDataURL = await QRCode.toDataURL(qrData, {
+            const qrImage = await QRCode.toDataURL(fullUrl, {
                 errorCorrectionLevel: 'H',
-                type: 'image/png',
-                width: 300,
-                margin: 2
+                margin: 2,
+                scale: 10,
+                color: {
+                    dark: '#000000',
+                    light: '#ffffff'
+                }
             });
 
-            return qrCodeDataURL;
-        } catch (error) {
-            const errMsg = error instanceof Error ? error.message : String(error);
-            console.error('❌ QR Code generation error:', errMsg);
-            throw new Error(`Failed to generate QR code: ${errMsg}`);
+            return qrImage;
+
+        } catch (err) {
+            console.error("Error generating QR code:", err);
+            throw new Error("Failed to generate QR Code");
         }
     }
 }

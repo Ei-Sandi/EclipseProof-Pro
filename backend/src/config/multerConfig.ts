@@ -31,7 +31,7 @@ const pdfFileFilter = (req: any, file: any, cb: any) => {
 };
 
 // Upload middleware for ID documents (images)
-export const uploadIdDocument = multer({
+export const uploadImageDocument = multer({
     storage: storage,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB limit
