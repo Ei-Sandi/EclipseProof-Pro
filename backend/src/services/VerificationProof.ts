@@ -134,9 +134,12 @@ export class VerificationProof {
                 currentZswapLocalState
             };
 
-            // PRODUCTION: Uncomment when contract is deployed to network
+            // PRODUCTION: Uncomment when contract is deployed to testnet
+            // Step 1: Query the deployed contract state from the indexer
             // import { indexerPublicDataProvider, QueryContext } from '@midnight-ntwrk/midnight-js-sdk';
-            // const contractAddress = process.env.PAYSLIP_CONTRACT_ADDRESS;
+            // const contractAddress = process.env.CONTRACT_ADDRESS;
+            // const indexerUrl = process.env.INDEXER_URL || 'https://indexer.testnet-02.midnight.network/api/v1/graphql';
+            // const indexerWsUrl = process.env.INDEXER_WS_URL || 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws';
             // const publicDataProvider = indexerPublicDataProvider({ indexerUrl, indexerWsUrl });
             // const onChainState = await publicDataProvider.queryContractState(contractAddress);
             // const queryContext = new QueryContext(onChainState, contractAddress);
@@ -156,6 +159,22 @@ export class VerificationProof {
                 proveAmountBigInt,
                 requestId
             );
+
+            // PRODUCTION: Step 2: Submit the proof transaction to the Midnight network
+            // This stores the verification result in the on-chain ledger so the verifier can query it later
+            // const circuitProvingKey = await user.wallet.getProvingKey('proveIncome');
+            // const tx = await user.wallet.submitTransaction({
+            //     contractAddress,
+            //     circuit: 'proveIncome',
+            //     args: [proveAmountBigInt, requestId],
+            //     proof: proveIncomeResult.proofData,
+            //     privateStateKey: currentPrivateState,
+            //     provingKey: circuitProvingKey
+            // });
+            // 
+            // console.log('📤 Transaction submitted:', tx.hash);
+            // await tx.wait(); // Wait for confirmation
+            // console.log('✅ Verification stored on-chain at requestId:', Buffer.from(requestId).toString('hex'));
 
             // 7) Convert requestId and salt to hex strings for QR code generation
             const requestIdHex = Buffer.from(requestId).toString('hex');
