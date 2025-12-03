@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "compile": "compact compile contracts/ep-contract.compact contracts/managed/ep-contract",
+    "compile": "compact compile contracts/src/ep-contract.compact contracts/managed/ep-contract",
     "build": "tsc",
     "deploy": "node dist/deploy.js",
     "dev:frontend": "cd frontend && npm run dev",
