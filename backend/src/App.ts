@@ -5,6 +5,7 @@ import fs from 'fs';
 
 import { authRouter } from './routes/authRoutes.js';
 import { proofRouter } from './routes/proofRoutes.js';
+import { router as verifierRouter } from './routes/verifierRoutes.js';
 import { DatabaseService } from './db/DatabaseService.js';
 import { UserAccountManager } from './services/UserAccountManager.js';
 
@@ -48,6 +49,7 @@ async function startServer() {
     // Route Handlers
     app.use('/api/auth', authRouter);
     app.use('/api/proof', proofRouter);
+    app.use(verifierRouter); // Verifier routes already include '/api/proof' prefix
 
     // Server Start (Only runs if DB connection succeeded)
     const server = app.listen(PORT, () => {
