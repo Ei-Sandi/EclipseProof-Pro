@@ -125,33 +125,15 @@ export function useProofGeneration() {
     };
 
     const downloadProof = () => {
-        if (!generatedProof) return;
+        if (!generatedProof || !generatedProof.qrCode) return;
 
-        const proofText = `
-EclipseProof Income Verification
-================================
-
-Proof ID: ${generatedProof.id}
-Generated: ${new Date(generatedProof.generatedAt).toLocaleString()}
-Valid Until: ${new Date(generatedProof.expiresAt).toLocaleString()}
-
-VERIFIED: The holder of this proof earns at least £${formData.proofAmount} per month.
-
-This verification was generated using zero-knowledge proofs on the Midnight blockchain.
-No exact income information was disclosed in the generation of this proof.
-
-To verify this proof, visit: https://eclipseproof.com/verify/${generatedProof.id}
-    `;
-
-        const blob = new Blob([proofText], { type: 'text/plain' });
-        const url = window.URL.createObjectURL(blob);
+        // Download QR code as PNG image
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `EclipseProof-${generatedProof.id}.txt`;
+        a.href = generatedProof.qrCode; // QR code is already a data URL
+        a.download = `EclipseProof-QR-${generatedProof.id}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
     };
 
     return {
