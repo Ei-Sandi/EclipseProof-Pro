@@ -52,7 +52,7 @@ export circuit getVerifiedResult(
   requestId: Bytes<32>,
   name: Bytes<32>,
   dob: Bytes<32>
-): VerificationResult {
+): Uint<64> {
 
   const stored: VerificationResult = verifications.lookup(disclose(requestId));
   
@@ -60,5 +60,5 @@ export circuit getVerifiedResult(
 
   assert(stored.identityHash == expected, "identity mismatch");
 
-  return stored;
+  return stored.provenLimit;
 }

@@ -131,8 +131,7 @@ router.post('/api/proof/verify-qr', uploadImageDocument.single('qrCode'), async 
             message: 'Verification successful',
             verified: true,
             result: {
-                identityHash: result.identityHash ? Buffer.from(result.identityHash).toString('hex') : undefined,
-                provenLimit: result.provenLimit ? (Number(result.provenLimit) / 100).toFixed(2) : undefined,
+                provenLimit: result ? (Number(result) / 100).toFixed(2) : undefined,
                 name,
                 dob
             }
