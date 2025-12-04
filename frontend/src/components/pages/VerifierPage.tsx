@@ -9,6 +9,11 @@ export default function VerifierPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<'success' | 'failure' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [verificationData, setVerificationData] = useState<{
+    provenLimit?: string;
+    name?: string;
+    dob?: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +58,7 @@ export default function VerifierPage() {
 
       if (response.ok && data.success) {
         setVerificationResult('success');
+        setVerificationData(data.result || null);
       } else {
         setVerificationResult('failure');
         setErrorMessage(data.message || 'Verification failed. Please check the details and try again.');
@@ -87,11 +93,10 @@ export default function VerifierPage() {
                 onClick={() => fileInputRef.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                  file
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${file
                     ? 'border-cyan-500 bg-cyan-50'
                     : 'border-slate-300 hover:border-cyan-400 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <input
                   type="file"
@@ -160,11 +165,10 @@ export default function VerifierPage() {
             <button
               type="submit"
               disabled={isVerifying || !file || !name || !dob}
-              className={`w-full py-4 rounded-lg text-white font-semibold text-lg flex items-center justify-center gap-2 transition-all ${
-                isVerifying || !file || !name || !dob
+              className={`w-full py-4 rounded-lg text-white font-semibold text-lg flex items-center justify-center gap-2 transition-all ${isVerifying || !file || !name || !dob
                   ? 'bg-slate-300 cursor-not-allowed'
                   : 'bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/20'
-              }`}
+                }`}
             >
               {isVerifying ? (
                 <>
@@ -182,44 +186,50 @@ export default function VerifierPage() {
 
           {/* Results Section */}
           {verificationResult && (
-            <div className={`mt-8 p-6 rounded-xl border ${
-              verificationResult === 'success' 
-                ? 'bg-green-50 border-green-200' 
+            <div className={`mt-8 p-6 rounded-xl border ${verificationResult === 'success'
+                ? 'bg-green-50 border-green-200'
                 : 'bg-red-50 border-red-200'
-            }`}>
+              }`}>
               <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-full ${
-                  verificationResult === 'success' ? 'bg-green-100' : 'bg-red-100'
-                }`}>
+                <div className={`p-2 rounded-full ${verificationResult === 'success' ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
                   {verificationResult === 'success' ? (
-                    <CheckCircle className={`w-6 h-6 ${
-                      verificationResult === 'success' ? 'text-green-600' : 'text-red-600'
-                    }`} />
+                    <CheckCircle className={`w-6 h-6 ${verificationResult === 'success' ? 'text-green-600' : 'text-red-600'
+                      }`} />
                   ) : (
                     <XCircle className="w-6 h-6 text-red-600" />
                   )}
                 </div>
                 <div>
-                  <h3 className={`text-lg font-bold mb-1 ${
-                    verificationResult === 'success' ? 'text-green-900' : 'text-red-900'
-                  }`}>
+                  <h3 className={`text-lg font-bold mb-1 ${verificationResult === 'success' ? 'text-green-900' : 'text-red-900'
+                    }`}>
                     {verificationResult === 'success' ? 'Verification Successful' : 'Verification Failed'}
                   </h3>
                   <p className={
                     verificationResult === 'success' ? 'text-green-700' : 'text-red-700'
                   }>
-                    {verificationResult === 'success' 
+                    {verificationResult === 'success'
                       ? 'The provided proof is valid and matches the applicant details. The income requirements are met.'
                       : errorMessage || 'The proof could not be verified. Please check the details and try again.'}
                   </p>
-                  
-                  {verificationResult === 'success' && (
+
+                  {verificationResult === 'success' && verificationData && (
                     <div className="mt-4 pt-4 border-t border-green-200 grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="block text-green-800 font-medium">Applicant</span>
-                        <span className="text-green-700">{name}</span>
+                        <span className="text-green-700">{verificationData.name || name}</span>
                       </div>
                       <div>
+                        <span className="block text-green-800 font-medium">Date of Birth</span>
+                        <span className="text-green-700">{verificationData.dob || dob}</span>
+                      </div>
+                      {verificationData.provenLimit && (
+                        <div className="col-span-2">
+                          <span className="block text-green-800 font-medium">Proven Income Limit</span>
+                          <span className="text-green-700 text-lg font-semibold">£{verificationData.provenLimit}/month</span>
+                        </div>
+                      )}
+                      <div className="col-span-2">
                         <span className="block text-green-800 font-medium">Verified Date</span>
                         <span className="text-green-700">{new Date().toLocaleDateString()}</span>
                       </div>
